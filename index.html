@@ -154,6 +154,7 @@
             font-weight: 700;
             color: var(--blue-accent);
             letter-spacing: 0.5px;
+            text-align: center;
         }
 
         .col-scroll-area {
@@ -338,7 +339,7 @@
             height: 90px;
             background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-mid) 100%);
             display: grid;
-            grid-template-columns: 280px 1fr 1fr;
+            grid-template-columns: 280px 1fr;
             gap: 0;
             flex-shrink: 0;
             border-top: 2px solid rgba(74,159,212,0.4);
@@ -400,21 +401,6 @@
             height: 58px;
         }
 
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-            border-right: 1px solid rgba(255,255,255,0.1);
-            padding: 10px 20px;
-        }
-
-        .footer-logo-img {
-            height: 52px;
-            width: auto;
-            object-fit: contain;
-        }
-
         /* News ticker */
         .footer-news {
             display: flex;
@@ -451,6 +437,28 @@
             align-items: center;
             gap: 12px;
             padding-right: 60px;
+        }
+
+        .news-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 5px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .news-thumb-placeholder {
+            width: 58px;
+            height: 58px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            flex-shrink: 0;
         }
 
         .news-dot {
@@ -550,7 +558,7 @@
         <!-- COURSES -->
         <div class="column">
             <div class="col-header">
-                <h2>Crew Training</h2>
+                <h2>Training Courses</h2>
             </div>
             <div class="col-scroll-area">
                 <div class="column-wrapper" id="coursesWrapper">
@@ -579,10 +587,6 @@
             <div class="qr-box" id="qrBox">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=116x116&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR Code" />
             </div>
-        </div>
-
-        <div class="footer-logo">
-            <img src="bw_logos_.png" alt="Bluewater" class="footer-logo-img">
         </div>
 
         <div class="footer-news">
@@ -759,20 +763,25 @@
     // ─── NEWS TICKER ───
     function initNewsTicker() {
         const items = [
-            { title:'Top 5 Must-Take Courses for Yacht Crew in 2025', date:'Feb 2025' },
-            { title:'Bluewater Networking Event – Antibes', date:'Mar 2025' },
-            { title:'New STCW Amendments: What Crew Need to Know', date:'Jan 2025' },
-            { title:'Mediterranean Season 2025 Crew Demand Report', date:'Feb 2025' },
-            { title:'GWO Certification Now Required for Select Superyachts', date:'Mar 2025' },
+            { title:'Bluewater Networking Event – Antibes', date:'Mar 2025', img:'https://www.bluewateryachting.com/_images/internet/news/networking-antibes.jpg' },
+            { title:'Top 5 Must-Take Courses for Yacht Crew in 2025', date:'Feb 2025', img:'' },
+            { title:'New STCW Amendments: What Crew Need to Know', date:'Jan 2025', img:'' },
+            { title:'Mediterranean Season 2025 Crew Demand Report', date:'Feb 2025', img:'' },
+            { title:'GWO Certification Now Required for Select Superyachts', date:'Mar 2025', img:'' },
         ];
 
-        const html = [...items, ...items].map(i => `
+        const html = [...items, ...items].map(i => {
+            const thumb = i.img
+                ? `<img class="news-thumb" src="${i.img}" alt="" onerror="this.style.display='none'">`
+                : `<div class="news-thumb-placeholder">📅</div>`;
+            return `
             <div class="news-item">
+                ${thumb}
                 <div class="news-dot"></div>
                 <span class="news-title">${i.title}</span>
                 <span class="news-date">${i.date}</span>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
 
         document.getElementById('newsTicker').innerHTML = html;
     }
