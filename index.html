@@ -385,8 +385,8 @@
         }
 
         .qr-box {
-            width: 62px;
-            height: 62px;
+            width: 80px;
+            height: 80px;
             background: #fff;
             border-radius: 5px;
             display: flex;
@@ -397,8 +397,8 @@
         }
 
         .qr-box img {
-            width: 58px;
-            height: 58px;
+            width: 76px;
+            height: 76px;
         }
 
         /* News ticker */
@@ -492,7 +492,7 @@
         }
 
         #coursesWrapper {
-            animation: scroll-up 56s linear infinite;
+            animation: scroll-up 80s linear infinite;
         }
 
         @keyframes scroll-up {
@@ -874,6 +874,19 @@
         } catch(e) { return getFallbackCourses(); }
     }
 
+    // ─── SYNC SCROLL SPEEDS ───
+    // Makes both columns scroll at the same px/second rate as jobs
+    function syncScrollSpeeds() {
+        const jobsWrapper = document.getElementById('jobsWrapper');
+        const coursesWrapper = document.getElementById('coursesWrapper');
+        const jobsHeight = jobsWrapper.scrollHeight / 2; // /2 because content is doubled
+        const coursesHeight = coursesWrapper.scrollHeight / 2;
+        const baseDuration = 80; // seconds for jobs
+        const coursesDuration = baseDuration * (coursesHeight / jobsHeight);
+        jobsWrapper.style.animationDuration = baseDuration + 's';
+        coursesWrapper.style.animationDuration = coursesDuration.toFixed(1) + 's';
+    }
+
     // ─── MAIN INIT ───
     async function init() {
         jobsData = getFallbackJobs();
@@ -882,18 +895,21 @@
         initializeCourses();
         initNewsTicker();
         fetchWeather();
+        setTimeout(syncScrollSpeeds, 100);
 
         const [jobs, courses] = await Promise.all([fetchJobs(), fetchCourses()]);
         jobsData = jobs;
         coursesData = courses;
         initializeJobs();
         initializeCourses();
+        setTimeout(syncScrollSpeeds, 100);
 
         setInterval(async () => {
             fetchWeather();
             const [j, c] = await Promise.all([fetchJobs(), fetchCourses()]);
             jobsData = j; coursesData = c;
             initializeJobs(); initializeCourses();
+            setTimeout(syncScrollSpeeds, 100);
         }, 30 * 60 * 1000);
     }
 
