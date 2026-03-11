@@ -659,9 +659,7 @@
     // ─── JOB CARD ───
     function createJobCard(job) {
         const badge = getBadge(job);
-        const oneImg = job.oneAccount
-            ? `<img src="https://www.bluewateryachting.com/_images/internet/buttons/one.png" alt="ONE" class="one-badge-img">`
-            : '';
+        const oneImg = '';
 
         // Extract yacht size if present in title (e.g. "57m")
         const sizeMatch = job.title.match(/(\d+m[+]?)/i);
