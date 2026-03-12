@@ -1147,24 +1147,23 @@
     // ─── NEWS TICKER ───
     function initNewsTicker() {
         const items = [
-            { title:'86th Edition Of IASST Maritime Safety Seminar – 28th April 2026, Palma', date:'Mar 2026', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', url:'https://www.bluewateryachting.com/news/86th-edition-of-iasst-maritime-safety-seminar-28th-april-2026-palma-1948' },
-            { title:'NextGen – New To Yachting Forum', date:'Feb 2026', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', url:'https://www.bluewateryachting.com/news/nextgen-new-to-yachting-forum-1940' },
-            { title:'Oceans Of Influence – Charity Gala Evening', date:'Feb 2026', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', url:'https://www.bluewateryachting.com/news/oceans-of-influence-charity-gala-evening-1939' },
-            { title:'Truffles, Motorbikes, Wine Tasting And Italy', date:'Feb 2026', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg', url:'https://www.bluewateryachting.com/news/truffles-motorbikes-wine-tasting-and-italy-1944' },
-            { title:'Winter Activities In Liguria, Italy', date:'Feb 2026', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216105210.jpg', url:'https://www.bluewateryachting.com/news/winter-activities-in-liguria-italy-1946' },
-            { title:'So You\'re In A Spanish Shipyard (Palma) For The Winter…What To Do?', date:'Feb 2026', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216131644.jpg', url:'https://www.bluewateryachting.com/news/so-you-re-in-a-spanish-shipyard-palma-for-the-winter-what-to-do-1947' },
+            { title:'86th Edition Of IASST Maritime Safety Seminar – 28th April 2026, Palma', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', url:'https://www.bluewateryachting.com/news/86th-edition-of-iasst-maritime-safety-seminar-28th-april-2026-palma-1948' },
+            { title:'NextGen – New To Yachting Forum', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', url:'https://www.bluewateryachting.com/news/nextgen-new-to-yachting-forum-1940' },
+            { title:'Oceans Of Influence – Charity Gala Evening', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', url:'https://www.bluewateryachting.com/news/oceans-of-influence-charity-gala-evening-1939' },
+            { title:'Truffles, Motorbikes, Wine Tasting And Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg', url:'https://www.bluewateryachting.com/news/truffles-motorbikes-wine-tasting-and-italy-1944' },
+            { title:'Winter Activities In Liguria, Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216105210.jpg', url:'https://www.bluewateryachting.com/news/winter-activities-in-liguria-italy-1946' },
+            { title:'So You\'re In A Spanish Shipyard (Palma) For The Winter…What To Do?', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216131644.jpg', url:'https://www.bluewateryachting.com/news/so-you-re-in-a-spanish-shipyard-palma-for-the-winter-what-to-do-1947' },
         ];
 
         const html = [...items, ...items].map(i => {
             const thumb = i.img
-                ? `<img class="news-thumb" src="${i.img}" alt="" onerror="this.outerHTML='<div class=\\'news-thumb-placeholder\\'>📅</div>'">`
-                : `<div class="news-thumb-placeholder">📅</div>`;
+                ? `<img class="news-thumb" src="${i.img}" alt="" onerror="this.outerHTML='<div class=\\'news-thumb-placeholder\\'>📰</div>'">`
+                : `<div class="news-thumb-placeholder">📰</div>`;
             return `
             <div class="news-item">
                 ${thumb}
                 <div class="news-dot"></div>
                 <span class="news-title">${i.title}</span>
-                <span class="news-date">${i.date}</span>
             </div>`;
         }).join('');
 
