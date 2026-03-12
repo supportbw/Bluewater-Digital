@@ -67,12 +67,9 @@
 
         .logo {
             z-index: 1;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            min-width: 200px;
             display: flex;
             align-items: center;
-            justify-content: center;
         }
 
         .logo-img {
@@ -89,7 +86,6 @@
             color: #ffffff;
             letter-spacing: 4px;
             z-index: 1;
-            min-width: 220px;
         }
 
         .header-weather {
@@ -182,7 +178,6 @@
         .mid-carousel-track {
             position: relative;
             width: 100%;
-            height: 230px;
         }
 
         .mid-slide {
@@ -191,8 +186,6 @@
             align-items: center;
             animation: fadeSlide 0.6s ease;
             width: 100%;
-            height: 230px;
-            justify-content: center;
         }
 
         .mid-slide.active { display: flex; }
@@ -594,7 +587,7 @@
         .footer-news-label {
             font-size: 0.7em;
             font-weight: 700;
-            color: rgba(255,255,255,0.55);
+            color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 6px;
@@ -1348,11 +1341,11 @@
                     <div class="mid-scan-text">Scan to download</div>
                 </div>`;
             } else {
+                const fullTitle = s.sub ? `${s.title||''} · ${s.sub}` : (s.title||'');
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
                     <img class="mid-event-img" src="${s.img||''}" alt=""
                          onerror="this.src='https://placehold.co/260x190/003876/ffffff?text=Event'" />
-                    <div class="mid-event-title">${s.title||''}</div>
-                    <div class="mid-event-sub">${s.sub||''}</div>
+                    <div class="mid-event-title">${fullTitle}</div>
                 </div>`;
             }
         }).join('');
