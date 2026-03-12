@@ -73,9 +73,11 @@
         }
 
         .logo-img {
-            height: 56px;
+            height: 70px;
             width: auto;
             object-fit: contain;
+            background: transparent;
+            mix-blend-mode: screen;
         }
 
         .header-clock {
@@ -177,6 +179,7 @@
         .mid-carousel-track {
             position: relative;
             width: 100%;
+            height: 230px;
         }
 
         .mid-slide {
@@ -184,6 +187,9 @@
             flex-direction: column;
             align-items: center;
             animation: fadeSlide 0.6s ease;
+            width: 100%;
+            height: 230px;
+            justify-content: center;
         }
 
         .mid-slide.active { display: flex; }
@@ -238,11 +244,12 @@
         /* Image/event slides */
         .mid-event-img {
             width: 100%;
-            height: 190px;
+            height: 170px;
             object-fit: cover;
             border-radius: 10px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
         }
 
         .mid-event-title {
@@ -311,16 +318,16 @@
         }
 
         .mid-info-label {
-            font-size: 0.68em;
-            color: rgba(255,255,255,0.55);
+            font-size: 0.72em;
+            color: rgba(255,255,255,0.75);
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 3px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .mid-info-value {
-            font-size: 1.0em;
+            font-size: 1.05em;
             color: #ffffff;
             font-weight: 700;
             font-family: Arial, Helvetica, sans-serif;
@@ -329,9 +336,16 @@
         }
 
         .mid-info-value.tel {
-            font-size: 0.88em;
-            color: var(--blue-light);
-            letter-spacing: 0.5px;
+            font-size: 1.0em;
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(74,159,212,0.8);
+        }
+
+        .mid-info-item:last-child {
+            background: rgba(74,159,212,0.2);
+            border: 1px solid rgba(74,159,212,0.5);
         }
 
         .col-header {
@@ -682,6 +696,154 @@
             height: 100vh;
             overflow: hidden;
         }
+
+        /* ─── ADMIN OVERLAY ─── */
+        #adminOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        #adminOverlay.open { display: flex; }
+
+        .admin-modal {
+            background: #fff;
+            border-radius: 14px;
+            width: 620px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #002558, #003876);
+            padding: 22px 28px;
+            border-radius: 14px 14px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-header-text h2 { color: #fff; font-size: 1.2em; font-weight: 700; letter-spacing: 0.5px; }
+        .admin-header-text span { font-size: 0.8em; color: rgba(255,255,255,0.6); margin-top: 2px; display: block; }
+
+        .admin-close {
+            background: rgba(255,255,255,0.15);
+            border: none; color: #fff;
+            width: 34px; height: 34px;
+            border-radius: 50%; font-size: 1.2em;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .admin-close:hover { background: rgba(255,255,255,0.3); }
+
+        .admin-body { padding: 24px 28px; }
+
+        #adminLogin { display: block; }
+        #adminPanel { display: none; }
+
+        .admin-login-wrap {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 14px; padding: 10px 0 10px;
+        }
+        .admin-login-wrap .lock-icon { font-size: 2.8em; }
+        .admin-login-wrap h3 { font-size: 1.1em; color: #1a2b45; font-weight: 700; }
+        .admin-login-wrap p { font-size: 0.85em; color: #666; text-align: center; }
+
+        .admin-input {
+            width: 100%; max-width: 280px;
+            padding: 12px 16px;
+            border: 2px solid #ccdaec; border-radius: 8px;
+            font-size: 1em; outline: none;
+            transition: border 0.2s; text-align: center; letter-spacing: 3px;
+        }
+        .admin-input:focus { border-color: #1a6fc4; }
+
+        .admin-btn {
+            padding: 11px 28px; border: none; border-radius: 8px;
+            font-size: 0.95em; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s; font-family: Arial, sans-serif;
+        }
+        .admin-btn:hover { opacity: 0.9; }
+        .admin-btn:active { transform: scale(0.98); }
+        .admin-btn-primary   { background: #003876; color: #fff; }
+        .admin-btn-danger    { background: #b02a37; color: #fff; }
+        .admin-btn-success   { background: #1e7e34; color: #fff; }
+        .admin-btn-secondary { background: #eef3f9; color: #1a2b45; border: 1px solid #ccdaec; }
+
+        .admin-error { color: #b02a37; font-size: 0.85em; text-align: center; min-height: 18px; }
+
+        .admin-section-title {
+            font-size: 0.72em; font-weight: 700; color: #5a7090;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            margin: 16px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #eef3f9;
+        }
+
+        .slide-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+        .slide-item {
+            background: #f7fafd; border: 1px solid #ccdaec;
+            border-radius: 10px; padding: 12px 14px;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .slide-thumb {
+            width: 70px; height: 50px; border-radius: 6px;
+            object-fit: cover; background: #dde6f0; flex-shrink: 0; border: 1px solid #ccdaec;
+        }
+
+        .slide-thumb-qr {
+            width: 70px; height: 50px; border-radius: 6px;
+            background: #003876; display: flex; align-items: center;
+            justify-content: center; color: #fff; font-size: 1.5em; flex-shrink: 0;
+        }
+
+        .slide-info { flex: 1; min-width: 0; }
+        .slide-info input {
+            width: 100%; padding: 7px 10px;
+            border: 1px solid #ccdaec; border-radius: 6px;
+            font-size: 0.83em; margin-bottom: 5px; outline: none; font-family: Arial, sans-serif;
+        }
+        .slide-info input:last-child { margin-bottom: 0; }
+        .slide-info input:focus { border-color: #1a6fc4; }
+        .slide-info input::placeholder { color: #bbb; }
+
+        .slide-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+        .slide-btn {
+            padding: 6px 13px; border: none; border-radius: 6px;
+            font-size: 0.78em; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s; font-family: Arial, sans-serif;
+        }
+        .slide-btn:hover { opacity: 0.8; }
+        .slide-btn-save   { background: #1a6fc4; color: #fff; }
+        .slide-btn-delete { background: #b02a37; color: #fff; }
+
+        .add-slide-form {
+            background: #eef3f9; border: 1.5px dashed #b0c4de;
+            border-radius: 10px; padding: 16px; margin-bottom: 16px;
+        }
+        .add-slide-form p { font-size: 0.82em; color: #5a7090; margin-bottom: 10px; font-weight: 600; }
+        .add-slide-form input {
+            width: 100%; padding: 9px 12px;
+            border: 1px solid #ccdaec; border-radius: 6px;
+            font-size: 0.85em; margin-bottom: 8px;
+            outline: none; font-family: Arial, sans-serif;
+        }
+        .add-slide-form input:focus { border-color: #1a6fc4; }
+        .add-slide-form input:last-of-type { margin-bottom: 12px; }
+
+        .admin-footer-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 14px; border-top: 1px solid #eef3f9; margin-top: 4px;
+        }
+        .admin-hint { font-size: 0.73em; color: #aaa; }
     </style>
 </head>
 <body>
@@ -722,51 +884,13 @@
         <!-- MIDDLE PANEL -->
         <div class="middle-panel">
 
-            <!-- CAROUSEL -->
+            <!-- CAROUSEL (populated by JS) -->
             <div class="mid-carousel">
-                <div class="mid-carousel-track">
-
-                    <!-- Slide 1: App / QR -->
-                    <div class="mid-slide active" id="slide-0">
-                        <div class="mid-app-title">Download Our App</div>
-                        <div class="mid-app-sub">Find Jobs &amp; Courses<br>on Your Phone</div>
-                        <div class="mid-qr">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR Code" />
-                        </div>
-                        <div class="mid-scan-text">Scan to download</div>
-                    </div>
-
-                    <!-- Slide 2: Event image example -->
-                    <div class="mid-slide" id="slide-1">
-                        <img class="mid-event-img" src="https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg" alt="Event" onerror="this.src='https://via.placeholder.com/260x190/003876/ffffff?text=Event'" />
-                        <div class="mid-event-title">IASST Maritime Safety Seminar</div>
-                        <div class="mid-event-sub">28th April 2026 · Palma</div>
-                    </div>
-
-                    <!-- Slide 3: Event image example -->
-                    <div class="mid-slide" id="slide-2">
-                        <img class="mid-event-img" src="https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg" alt="Event" onerror="this.src='https://via.placeholder.com/260x190/003876/ffffff?text=Event'" />
-                        <div class="mid-event-title">NextGen – New To Yachting Forum</div>
-                        <div class="mid-event-sub">Feb 2026 · Antibes</div>
-                    </div>
-
-                    <!-- Slide 4: Event image example -->
-                    <div class="mid-slide" id="slide-3">
-                        <img class="mid-event-img" src="https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg" alt="Event" onerror="this.src='https://via.placeholder.com/260x190/003876/ffffff?text=Event'" />
-                        <div class="mid-event-title">Oceans Of Influence – Charity Gala</div>
-                        <div class="mid-event-sub">Feb 2026 · Antibes</div>
-                    </div>
-
-                </div>
+                <div class="mid-carousel-track" id="carouselTrack"></div>
             </div>
 
-            <!-- DOTS -->
-            <div class="mid-dots" id="midDots">
-                <div class="mid-dot active" onclick="goToSlide(0)"></div>
-                <div class="mid-dot" onclick="goToSlide(1)"></div>
-                <div class="mid-dot" onclick="goToSlide(2)"></div>
-                <div class="mid-dot" onclick="goToSlide(3)"></div>
-            </div>
+            <!-- DOTS (populated by JS) -->
+            <div class="mid-dots" id="midDots"></div>
 
             <div class="mid-divider"></div>
 
@@ -804,14 +928,64 @@
         <div class="footer-news" style="grid-column: 1 / -1; padding: 10px 30px;">
             <div class="footer-news-label">Upcoming Events &amp; Latest News</div>
             <div class="news-ticker-wrap">
-                <div class="news-ticker" id="newsTicker">
-                    <!-- populated by JS -->
-                </div>
+                <div class="news-ticker" id="newsTicker"></div>
             </div>
         </div>
     </div>
 
-</div>
+</div><!-- end .app -->
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  ADMIN OVERLAY  (open with Ctrl+Shift+A)        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="adminOverlay">
+    <div class="admin-modal">
+
+        <div class="admin-header">
+            <div class="admin-header-text">
+                <h2>⚙️ Carousel Manager</h2>
+                <span>Bluewater Digital Display · Admin</span>
+            </div>
+            <button class="admin-close" onclick="closeAdmin()">✕</button>
+        </div>
+
+        <div class="admin-body">
+
+            <!-- LOGIN SCREEN -->
+            <div id="adminLogin">
+                <div class="admin-login-wrap">
+                    <div class="lock-icon">🔒</div>
+                    <h3>Admin Access</h3>
+                    <p>Enter the admin password to manage carousel slides.</p>
+                    <input class="admin-input" type="password" id="adminPwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') checkPassword()" />
+                    <div class="admin-error" id="adminError"></div>
+                    <button class="admin-btn admin-btn-primary" onclick="checkPassword()">Unlock</button>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL -->
+            <div id="adminPanel">
+                <div class="admin-section-title">📋 Current Slides</div>
+                <div class="slide-list" id="adminSlideList"></div>
+
+                <div class="admin-section-title">➕ Add New Slide</div>
+                <div class="add-slide-form">
+                    <p>Paste a direct image URL (jpg, png, webp) or leave blank to use a colour placeholder.</p>
+                    <input type="text" id="newImgUrl"   placeholder="Image URL  e.g. https://example.com/photo.jpg" />
+                    <input type="text" id="newTitle"    placeholder="Title  e.g. Med Season Kick-Off Party" />
+                    <input type="text" id="newSubtitle" placeholder="Subtitle  e.g. 15 May 2026 · Antibes" />
+                    <button class="admin-btn admin-btn-success" onclick="addSlide()">Add Slide</button>
+                </div>
+
+                <div class="admin-footer-row">
+                    <span class="admin-hint">Changes save instantly · Press Ctrl+Shift+A to reopen</span>
+                    <button class="admin-btn admin-btn-secondary" onclick="closeAdmin()">Close</button>
+                </div>
+            </div>
+
+        </div><!-- end admin-body -->
+    </div><!-- end admin-modal -->
+</div><!-- end adminOverlay -->
 
 <script>
     let jobsData = [];
@@ -1122,26 +1296,204 @@
         }, 30 * 60 * 1000);
     }
 
-    // ─── MIDDLE CAROUSEL ───
-    let currentSlide = 0;
-    const totalSlides = 4;
+    // ─── MIDDLE CAROUSEL (admin-driven) ───
+    const ADMIN_PASSWORD = 'Bluewater2026';
+    const STORAGE_KEY    = 'bw_carousel_slides';
+
+    // Default slides (used if nothing stored yet)
+    const DEFAULT_SLIDES = [
+        { type:'qr' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', title:'IASST Maritime Safety Seminar', sub:'28th April 2026 · Palma' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', title:'NextGen – New To Yachting Forum', sub:'Feb 2026 · Antibes' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', title:'Oceans Of Influence – Charity Gala', sub:'Feb 2026 · Antibes' },
+    ];
+
+    let carouselSlides = [];
+    let currentSlide   = 0;
+    let carouselTimer  = null;
+
+    // ── Load from localStorage ──
+    function loadSlides() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+        } catch(e) {}
+        return JSON.parse(JSON.stringify(DEFAULT_SLIDES));
+    }
+
+    function saveSlides() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(carouselSlides)); } catch(e) {}
+    }
+
+    // ── Render carousel from data ──
+    function renderCarousel() {
+        const track = document.querySelector('.mid-carousel-track');
+        const dotsEl = document.getElementById('midDots');
+        if (!track || !dotsEl) return;
+
+        track.innerHTML = carouselSlides.map((s, i) => {
+            if (s.type === 'qr') {
+                return `<div class="mid-slide${i===0?' active':''}" id="slide-${i}">
+                    <div class="mid-app-title">Download Our App</div>
+                    <div class="mid-app-sub">Find Jobs &amp; Courses<br>on Your Phone</div>
+                    <div class="mid-qr">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR" />
+                    </div>
+                    <div class="mid-scan-text">Scan to download</div>
+                </div>`;
+            } else {
+                return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
+                    <img class="mid-event-img" src="${s.img||''}" alt=""
+                         onerror="this.src='https://placehold.co/260x190/003876/ffffff?text=Event'" />
+                    <div class="mid-event-title">${s.title||''}</div>
+                    <div class="mid-event-sub">${s.sub||''}</div>
+                </div>`;
+            }
+        }).join('');
+
+        dotsEl.innerHTML = carouselSlides.map((_, i) =>
+            `<div class="mid-dot${i===currentSlide?' active':''}" onclick="goToSlide(${i})"></div>`
+        ).join('');
+    }
 
     function goToSlide(n) {
-        document.getElementById('slide-' + currentSlide).classList.remove('active');
-        document.querySelectorAll('.mid-dot')[currentSlide].classList.remove('active');
-        currentSlide = n;
-        document.getElementById('slide-' + currentSlide).classList.add('active');
-        document.querySelectorAll('.mid-dot')[currentSlide].classList.add('active');
+        const slides = document.querySelectorAll('.mid-slide');
+        const dots   = document.querySelectorAll('.mid-dot');
+        if (!slides.length) return;
+        slides[currentSlide]?.classList.remove('active');
+        dots[currentSlide]?.classList.remove('active');
+        currentSlide = ((n % carouselSlides.length) + carouselSlides.length) % carouselSlides.length;
+        slides[currentSlide]?.classList.add('active');
+        dots[currentSlide]?.classList.add('active');
     }
 
-    function nextSlide() {
-        goToSlide((currentSlide + 1) % totalSlides);
+    function startCarouselTimer() {
+        if (carouselTimer) clearInterval(carouselTimer);
+        carouselTimer = setInterval(() => goToSlide(currentSlide + 1), 6000);
     }
 
-    // Auto-advance every 6 seconds
-    setInterval(nextSlide, 6000);
+    function initCarousel() {
+        carouselSlides = loadSlides();
+        currentSlide   = 0;
+        renderCarousel();
+        startCarouselTimer();
+    }
+
+    // ─── ADMIN PANEL ───
+    function openAdmin() {
+        document.getElementById('adminOverlay').classList.add('open');
+        document.getElementById('adminPwInput').value = '';
+        document.getElementById('adminError').textContent = '';
+        document.getElementById('adminLogin').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    function closeAdmin() {
+        document.getElementById('adminOverlay').classList.remove('open');
+        document.getElementById('adminLogin').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    function checkPassword() {
+        const val = document.getElementById('adminPwInput').value;
+        if (val === ADMIN_PASSWORD) {
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdminPanel();
+        } else {
+            document.getElementById('adminError').textContent = '❌ Incorrect password. Try again.';
+            document.getElementById('adminPwInput').value = '';
+            document.getElementById('adminPwInput').focus();
+        }
+    }
+
+    function renderAdminPanel() {
+        const list = document.getElementById('adminSlideList');
+        list.innerHTML = carouselSlides.map((s, i) => {
+            const thumb = s.type === 'qr'
+                ? `<div class="slide-thumb-qr">📱</div>`
+                : `<img class="slide-thumb" src="${s.img||''}" onerror="this.src='https://placehold.co/70x50/ccdaec/666?text=IMG'" />`;
+
+            const isQR = s.type === 'qr';
+            return `<div class="slide-item" id="admin-slide-${i}">
+                ${thumb}
+                <div class="slide-info">
+                    ${isQR
+                        ? `<input type="text" value="QR Code – Download App" disabled style="background:#f0f4f8;color:#888;" />`
+                        : `<input type="text" id="si-img-${i}"   value="${s.img||''}"   placeholder="Image URL" />
+                           <input type="text" id="si-title-${i}" value="${s.title||''}" placeholder="Title" />
+                           <input type="text" id="si-sub-${i}"   value="${s.sub||''}"   placeholder="Subtitle / date" />`
+                    }
+                </div>
+                <div class="slide-actions">
+                    ${!isQR ? `<button class="slide-btn slide-btn-save" onclick="saveSlide(${i})">Save</button>` : ''}
+                    ${!isQR ? `<button class="slide-btn slide-btn-delete" onclick="deleteSlide(${i})">Delete</button>` : ''}
+                    ${isQR  ? `<span style="font-size:0.75em;color:#888;">Fixed</span>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function saveSlide(i) {
+        if (carouselSlides[i].type === 'qr') return;
+        carouselSlides[i].img   = document.getElementById(`si-img-${i}`).value.trim();
+        carouselSlides[i].title = document.getElementById(`si-title-${i}`).value.trim();
+        carouselSlides[i].sub   = document.getElementById(`si-sub-${i}`).value.trim();
+        saveSlides();
+        renderCarousel();
+        startCarouselTimer();
+        renderAdminPanel();
+        flashConfirm(`admin-slide-${i}`);
+    }
+
+    function deleteSlide(i) {
+        if (!confirm('Delete this slide?')) return;
+        carouselSlides.splice(i, 1);
+        if (currentSlide >= carouselSlides.length) currentSlide = 0;
+        saveSlides();
+        renderCarousel();
+        startCarouselTimer();
+        renderAdminPanel();
+    }
+
+    function addSlide() {
+        const img   = document.getElementById('newImgUrl').value.trim();
+        const title = document.getElementById('newTitle').value.trim();
+        const sub   = document.getElementById('newSubtitle').value.trim();
+        if (!title && !img) { alert('Please enter at least a title or image URL.'); return; }
+        carouselSlides.push({ type:'image', img, title, sub });
+        saveSlides();
+        renderCarousel();
+        startCarouselTimer();
+        renderAdminPanel();
+        document.getElementById('newImgUrl').value   = '';
+        document.getElementById('newTitle').value    = '';
+        document.getElementById('newSubtitle').value = '';
+    }
+
+    function flashConfirm(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.background = '#d4edda';
+        el.style.borderColor = '#28a745';
+        setTimeout(() => { el.style.background = ''; el.style.borderColor = ''; }, 1200);
+    }
+
+    // Open admin with Ctrl+Shift+A
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); openAdmin(); }
+    });
+
+    // Close overlay on backdrop click
+    document.getElementById('adminOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('adminOverlay')) closeAdmin();
+    });
 
     init();
+    initCarousel();
 </script>
 </body>
 </html>
