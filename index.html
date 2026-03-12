@@ -67,15 +67,16 @@
 
         .logo {
             z-index: 1;
-            min-width: 200px;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
         .logo-img {
             height: 70px;
             width: auto;
             object-fit: contain;
+            mix-blend-mode: lighten;
         }
 
         .header-clock {
@@ -849,11 +850,11 @@
 
     <!-- HEADER -->
     <div class="header">
+        <div class="header-clock" id="clock">00:00</div>
+
         <div class="logo">
             <img src="bw_logos_.png" alt="Bluewater" class="logo-img">
         </div>
-
-        <div class="header-clock" id="clock">00:00</div>
 
         <div class="header-weather" id="weatherWidget">
             <div class="weather-icon-large">🌤️</div>
