@@ -1036,9 +1036,7 @@
     function createJobCard(job) {
         const badge = getBadge(job);
         const oneImg = job.oneAccount
-            ? `<img src="https://www.bluewateryachting.com/_uploads/website/one-account-logo.png"
-                     onerror="this.style.display='none'"
-                     style="height:22px;width:auto;vertical-align:middle;margin-left:8px;border-radius:50%;" alt="OneAccount" />`
+            ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#003876;color:#ffffff;font-size:0.6em;font-weight:900;letter-spacing:0.5px;width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-left:6px;flex-shrink:0;border:2px solid #4a9fd4;">ONE</span>`
             : '';
         const cleanTitle = job.title;
 
@@ -1084,7 +1082,7 @@
                         <a href="${course.url || '#'}" target="_blank">${course.course}</a>
                     </div>
                     <div class="course-details">
-                        ${course.date ? `${course.date}` : ''}${course.location ? ` – ${course.location}` : ''}
+                        ${course.date ? `<span style="color:#4a9fd4;font-weight:700;">📅 ${course.date}</span>` : ''}${course.location ? ` &nbsp;·&nbsp; ${course.location}` : ''}
                     </div>
                 </div>
                 <div class="course-right">
@@ -1202,7 +1200,13 @@
                 else if (text.includes('Salary:')) salary = text.replace('Salary:', '').trim();
             });
 
-            const oneAccount = !!container.querySelector('img[src*="one.png"]');
+            const oneAccount = !!(
+                container.querySelector('img[src*="one"]') ||
+                container.querySelector('img[alt*="one" i]') ||
+                container.querySelector('[class*="one-account"],[class*="oneaccount"],[class*="one_account"]') ||
+                container.innerHTML.toLowerCase().includes('one-account') ||
+                container.innerHTML.toLowerCase().includes('oneaccount')
+            );
 
             // Detect URGENT / NEW badges from page
             const containerText = container.innerHTML.toLowerCase();
