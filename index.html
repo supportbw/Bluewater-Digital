@@ -1158,31 +1158,49 @@
         const items = [];
         const seen = new Set();
 
-        // News items: anchors linking to /news/... with an image inside
+        // Each news item is an <a> wrapping an <img> pointing to /news/slug-NNNN
         doc.querySelectorAll('a[href*="/news/"]').forEach(link => {
             const href = link.href;
-            if (seen.has(href) || !href.includes('/news/')) return;
-            const title = link.textContent.trim();
-            if (!title || title.length < 5) return;
+            // Must be a real news article (has numeric ID at end), not a category filter
+            if (!href.match(/\/news\/[a-z0-9-]+-\d+$/)) return;
+            if (seen.has(href)) return;
             const img = link.querySelector('img');
-            const imgSrc = img ? (img.src || img.getAttribute('src')) : null;
-            // Only use items that have both a title and image
-            if (title && imgSrc && imgSrc.includes('_uploads')) {
-                seen.add(href);
-                items.push({ title, img: imgSrc, url: href });
-            }
+            if (!img) return; // only grab the image-link version, skip duplicate text links
+            const imgSrc = img.src || img.getAttribute('src') || '';
+            if (!imgSrc.includes('_uploads')) return;
+            // Get title from the next sibling anchor (text link)
+            const nextLink = link.nextElementSibling;
+            const title = (nextLink && nextLink.tagName === 'A')
+                ? nextLink.textContent.trim()
+                : img.alt || '';
+            if (!title) return;
+            seen.add(href);
+            items.push({ title, img: imgSrc, url: href });
         });
 
-        return items.slice(0, 10);
+        return items;
     }
 
     async function fetchNews() {
         try {
-            const res = await fetch('https://www.bluewateryachting.com/news');
-            const html = await res.text();
-            const items = parseNewsFromHTML(html);
-            if (items.length > 0) {
-                renderNewsTicker(items);
+            // Fetch page 1 and page 2 to get 10+ items
+            const [res1, res2] = await Promise.all([
+                fetch('https://www.bluewateryachting.com/news?t=' + Date.now()),
+                fetch('https://www.bluewateryachting.com/news?start_pos=6&t=' + Date.now()),
+            ]);
+            const [html1, html2] = await Promise.all([res1.text(), res2.text()]);
+            const items = [...parseNewsFromHTML(html1), ...parseNewsFromHTML(html2)];
+
+            // Deduplicate and take first 10
+            const seen = new Set();
+            const unique = items.filter(i => {
+                if (seen.has(i.url)) return false;
+                seen.add(i.url);
+                return true;
+            }).slice(0, 10);
+
+            if (unique.length > 0) {
+                renderNewsTicker(unique);
             } else {
                 initNewsTickerFallback();
             }
@@ -1191,12 +1209,12 @@
 
     function initNewsTickerFallback() {
         const items = [
-            { title:'86th Edition Of IASST Maritime Safety Seminar – 28th April 2026, Palma', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg' },
-            { title:'NextGen – New To Yachting Forum', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg' },
-            { title:'Oceans Of Influence – Charity Gala Evening', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg' },
-            { title:'Truffles, Motorbikes, Wine Tasting And Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg' },
+            { title:'86th Edition Of IASST Maritime Safety Seminar - 28th April 2026, Palma', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg' },
             { title:'Winter Activities In Liguria, Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216105210.jpg' },
             { title:'So You\'re In A Spanish Shipyard (Palma) For The Winter…What To Do?', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216131644.jpg' },
+            { title:'NextGen – New To Yachting Forum', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg' },
+            { title:'Truffles, Motorbikes, Wine Tasting And Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg' },
+            { title:'Oceans Of Influence – Charity Gala Evening', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg' },
         ];
         renderNewsTicker(items);
     }
@@ -1507,14 +1525,14 @@
         renderCarousel();
         startCarouselTimer();
 
-        // Refresh carousel from GitHub every 30 minutes
+        // Refresh carousel from GitHub every 2 minutes
         setInterval(async () => {
             const fresh = await loadSlides();
             carouselSlides = fresh;
             currentSlide = 0;
             renderCarousel();
             startCarouselTimer();
-        }, 30 * 60 * 1000);
+        }, 2 * 60 * 1000);
     }
 
     // ─── ADMIN PANEL ───
