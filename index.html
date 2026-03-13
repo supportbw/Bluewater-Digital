@@ -1155,27 +1155,27 @@
     function parseNewsFromHTML(html) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
+        const base = 'https://www.bluewateryachting.com';
         const items = [];
         const seen = new Set();
 
-        // Each news item is an <a> wrapping an <img> pointing to /news/slug-NNNN
         doc.querySelectorAll('a[href*="/news/"]').forEach(link => {
-            const href = link.href;
-            // Must be a real news article (has numeric ID at end), not a category filter
-            if (!href.match(/\/news\/[a-z0-9-]+-\d+$/)) return;
-            if (seen.has(href)) return;
+            const href = link.getAttribute('href') || '';
+            const fullHref = href.startsWith('http') ? href : base + href;
+            if (!fullHref.match(/\/news\/[a-z0-9-]+-\d+$/)) return;
+            if (seen.has(fullHref)) return;
             const img = link.querySelector('img');
-            if (!img) return; // only grab the image-link version, skip duplicate text links
-            const imgSrc = img.src || img.getAttribute('src') || '';
+            if (!img) return;
+            const rawSrc = img.getAttribute('src') || '';
+            const imgSrc = rawSrc.startsWith('http') ? rawSrc : base + rawSrc;
             if (!imgSrc.includes('_uploads')) return;
-            // Get title from the next sibling anchor (text link)
             const nextLink = link.nextElementSibling;
             const title = (nextLink && nextLink.tagName === 'A')
                 ? nextLink.textContent.trim()
                 : img.alt || '';
             if (!title) return;
-            seen.add(href);
-            items.push({ title, img: imgSrc, url: href });
+            seen.add(fullHref);
+            items.push({ title, img: imgSrc, url: fullHref });
         });
 
         return items;
@@ -1419,14 +1419,14 @@
         initializeCourses();
         initNewsTicker();
         fetchWeather();
-        setTimeout(syncScrollSpeeds, 100);
+        setTimeout(syncScrollSpeeds, 500);
 
         const [jobs, courses] = await Promise.all([fetchJobs(), fetchCourses()]);
         jobsData = jobs;
         coursesData = courses;
         initializeJobs();
         initializeCourses();
-        setTimeout(syncScrollSpeeds, 100);
+        setTimeout(syncScrollSpeeds, 500);
 
         setInterval(async () => {
             fetchWeather();
@@ -1434,7 +1434,7 @@
             const [j, c] = await Promise.all([fetchJobs(), fetchCourses()]);
             jobsData = j; coursesData = c;
             initializeJobs(); initializeCourses();
-            setTimeout(syncScrollSpeeds, 100);
+            setTimeout(syncScrollSpeeds, 500);
         }, 30 * 60 * 1000);
     }
 
