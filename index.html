@@ -1219,8 +1219,41 @@
                 const date = cells[0].textContent.trim();
                 const course = cells[1].textContent.trim();
                 const location = cells[2].textContent.trim();
-                const availLink = cells[3].querySelector('a');
-                const availability = availLink ? availLink.textContent.trim() : 'N/A';
+
+                // Try multiple ways to detect availability
+                const cell3 = cells[3];
+                const cell3Text = cell3.textContent.trim().toLowerCase();
+                const cell3HTML = cell3.innerHTML.toLowerCase();
+
+                // Check for CSS classes on elements inside the cell
+                const statusEl = cell3.querySelector('[class*="full"],[class*="available"],[class*="wait"],[class*="book"],[class*="status"],[class*="avail"]');
+                const btnEl = cell3.querySelector('a, button, span');
+                const btnText = btnEl ? btnEl.textContent.trim() : '';
+
+                let availability = 'Available';
+
+                // Priority: check for fully booked / waiting list indicators
+                if (cell3HTML.includes('full') || cell3Text.includes('full') || cell3Text.includes('waiting') || cell3Text.includes('wait list') || cell3Text.includes('booked')) {
+                    availability = 'Fully Booked';
+                } else if (statusEl && statusEl.className.toLowerCase().includes('full')) {
+                    availability = 'Fully Booked';
+                } else if (cell3Text.includes('soon') || cell3Text.includes('starting soon') || cell3Text.includes('nearly')) {
+                    availability = 'Starting Soon';
+                } else if (cell3Text.match(/\d+\s*space/) || cell3Text.match(/\d+\s*left/) || cell3Text.match(/\d+\s*place/)) {
+                    availability = cell3.textContent.trim(); // e.g. "3 Spaces Left"
+                } else if (btnText) {
+                    const bt = btnText.toLowerCase();
+                    if (bt.includes('full') || bt.includes('waiting') || bt.includes('booked')) {
+                        availability = 'Fully Booked';
+                    } else if (bt.includes('soon') || bt.includes('nearly')) {
+                        availability = 'Starting Soon';
+                    } else if (bt.match(/\d+\s*space/) || bt.match(/\d+\s*left/)) {
+                        availability = btnText;
+                    } else {
+                        availability = btnText || 'Available';
+                    }
+                }
+
                 const detailsLink = row.querySelector('a[href*="training-class"]');
                 const url = detailsLink ? detailsLink.href : '#';
                 if (course && course !== 'Course') courses.push({ date, course, location, availability, url });
@@ -1338,8 +1371,10 @@
             } else {
                 const fullTitle = s.sub ? `${s.title||''} · ${s.sub}` : (s.title||'');
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
-                    <img class="mid-event-img" src="${s.img||''}" alt=""
-                         onerror="this.src='https://placehold.co/150x150/003876/ffffff?text=Event'" />
+                    <div class="mid-qr" style="overflow:hidden;padding:0;">
+                        <img src="${s.img||''}" alt="" style="width:150px;height:150px;object-fit:cover;display:block;border-radius:12px;"
+                             onerror="this.src='https://placehold.co/150x150/003876/ffffff?text=Event'" />
+                    </div>
                     <div class="mid-app-title" style="font-size:1.0em;margin-bottom:0;">${fullTitle}</div>
                 </div>`;
             }
