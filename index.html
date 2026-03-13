@@ -236,13 +236,13 @@
             letter-spacing: 0.3px;
         }
 
-        /* Image/event slides */
+        /* Image/event slides — same size as QR box */
         .mid-event-img {
-            width: 100%;
-            height: 170px;
+            width: 150px;
+            height: 150px;
             object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             margin-bottom: 8px;
             flex-shrink: 0;
         }
@@ -1338,10 +1338,8 @@
             } else {
                 const fullTitle = s.sub ? `${s.title||''} · ${s.sub}` : (s.title||'');
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
-                    <div class="mid-qr" style="width:150px;height:150px;border-radius:12px;overflow:hidden;margin-bottom:12px;">
-                        <img src="${s.img||''}" alt="" style="width:150px;height:150px;object-fit:cover;"
-                             onerror="this.src='https://placehold.co/150x150/003876/ffffff?text=Event'" />
-                    </div>
+                    <img class="mid-event-img" src="${s.img||''}" alt=""
+                         onerror="this.src='https://placehold.co/150x150/003876/ffffff?text=Event'" />
                     <div class="mid-app-title" style="font-size:1.0em;margin-bottom:0;">${fullTitle}</div>
                 </div>`;
             }
