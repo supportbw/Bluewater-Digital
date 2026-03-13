@@ -215,8 +215,8 @@
         }
 
         .mid-qr {
-            width: 150px;
-            height: 150px;
+            width: 200px;
+            height: 200px;
             background: #ffffff;
             border-radius: 12px;
             display: flex;
@@ -227,7 +227,8 @@
             flex-shrink: 0;
         }
 
-        .mid-qr img { width: 138px; height: 138px; }
+        .mid-qr img { width: 186px; height: 186px; }
+        .mid-qr img.event-photo { width: 200px; height: 200px; border-radius: 12px; }
 
         .mid-scan-text {
             font-size: 0.75em;
@@ -1364,18 +1365,19 @@
                     <div class="mid-app-title">Download Our App</div>
                     <div class="mid-app-sub">Find Jobs &amp; Courses<br>on Your Phone</div>
                     <div class="mid-qr">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR" />
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=186x186&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR" />
                     </div>
                     <div class="mid-scan-text">Scan to download</div>
                 </div>`;
             } else {
                 const fullTitle = s.sub ? `${s.title||''} · ${s.sub}` : (s.title||'');
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
+                    <div class="mid-app-title" style="font-size:1.1em;">${s.title||''}</div>
+                    <div class="mid-app-sub">${s.sub||'&nbsp;'}</div>
                     <div class="mid-qr" style="overflow:hidden;padding:0;">
-                        <img src="${s.img||''}" alt="" style="width:150px;height:150px;object-fit:cover;display:block;border-radius:12px;"
-                             onerror="this.src='https://placehold.co/150x150/003876/ffffff?text=Event'" />
+                        <img class="event-photo" src="${s.img||''}" alt="" style="object-fit:cover;display:block;"
+                             onerror="this.src='https://placehold.co/200x200/003876/ffffff?text=Event'" />
                     </div>
-                    <div class="mid-app-title" style="font-size:1.0em;margin-bottom:0;">${fullTitle}</div>
                 </div>`;
             }
         }).join('');
