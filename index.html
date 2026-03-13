@@ -1398,19 +1398,6 @@
         } catch(e) { return getFallbackCourses(); }
     }
 
-    // ─── SYNC SCROLL SPEEDS ───
-    // Makes both columns scroll at the same px/second rate as jobs
-    function syncScrollSpeeds() {
-        const jobsWrapper = document.getElementById('jobsWrapper');
-        const coursesWrapper = document.getElementById('coursesWrapper');
-        const jobsHeight = jobsWrapper.scrollHeight / 2; // /2 because content is doubled
-        const coursesHeight = coursesWrapper.scrollHeight / 2;
-        const baseDuration = 80; // seconds for jobs
-        const coursesDuration = baseDuration * (coursesHeight / jobsHeight);
-        jobsWrapper.style.animationDuration = baseDuration + 's';
-        coursesWrapper.style.animationDuration = coursesDuration.toFixed(1) + 's';
-    }
-
     // ─── MAIN INIT ───
     async function init() {
         jobsData = getFallbackJobs();
@@ -1419,14 +1406,12 @@
         initializeCourses();
         initNewsTicker();
         fetchWeather();
-        setTimeout(syncScrollSpeeds, 500);
 
         const [jobs, courses] = await Promise.all([fetchJobs(), fetchCourses()]);
         jobsData = jobs;
         coursesData = courses;
         initializeJobs();
         initializeCourses();
-        setTimeout(syncScrollSpeeds, 500);
 
         setInterval(async () => {
             fetchWeather();
@@ -1434,7 +1419,6 @@
             const [j, c] = await Promise.all([fetchJobs(), fetchCourses()]);
             jobsData = j; coursesData = c;
             initializeJobs(); initializeCourses();
-            setTimeout(syncScrollSpeeds, 500);
         }, 30 * 60 * 1000);
     }
 
