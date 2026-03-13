@@ -185,6 +185,7 @@
             align-items: center;
             animation: fadeSlide 0.6s ease;
             width: 100%;
+            min-height: 230px;
         }
 
         .mid-slide.active { display: flex; }
@@ -1388,9 +1389,9 @@
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
                     <div class="mid-app-title" style="font-size:1.1em;">${s.title||''}</div>
                     <div class="mid-app-sub">&nbsp;</div>
-                    <div class="mid-qr" style="overflow:hidden;padding:0;">
-                        <img class="event-photo" src="${s.img||''}" alt="" style="object-fit:cover;display:block;"
-                             onerror="this.src='https://placehold.co/200x200/003876/ffffff?text=Event'" />
+                    <div class="mid-qr" style="overflow:hidden;padding:0;width:100%;height:160px;">
+                        <img class="event-photo" src="${s.img||''}" alt="" style="width:100%;height:160px;object-fit:cover;display:block;border-radius:10px;"
+                             onerror="this.src='https://placehold.co/260x160/003876/ffffff?text=Event'" />
                     </div>
                 </div>`;
             }
