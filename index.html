@@ -215,7 +215,7 @@
         }
 
         .mid-qr {
-            width: 200px;
+            width: 100%;
             height: 200px;
             background: #ffffff;
             border-radius: 12px;
@@ -228,7 +228,7 @@
         }
 
         .mid-qr img { width: 186px; height: 186px; }
-        .mid-qr img.event-photo { width: 200px; height: 200px; border-radius: 12px; }
+        .mid-qr img.event-photo { width: 100%; height: 200px; border-radius: 12px; object-fit: cover; }
 
         .mid-scan-text {
             font-size: 0.75em;
@@ -1203,7 +1203,15 @@
             });
 
             const oneAccount = !!container.querySelector('img[src*="one.png"]');
-            jobs.push({ title, url, location: location || 'Various', type: type || 'N/A', qualifications: qualifications || 'See listing', experience: experience || 'See listing', salary: salary || 'DOE', oneAccount });
+
+            // Detect URGENT / NEW badges from page
+            const containerText = container.innerHTML.toLowerCase();
+            const containerClass = container.className.toLowerCase();
+            let badge = '';
+            if (containerText.includes('urgent') || containerClass.includes('urgent')) badge = 'urgent';
+            else if (containerText.includes('"new"') || containerText.includes('>new<') || containerClass.includes('new') || containerText.includes('badge-new')) badge = 'new';
+
+            jobs.push({ title, url, location: location || 'Various', type: type || 'N/A', qualifications: qualifications || 'See listing', experience: experience || 'See listing', salary: salary || 'DOE', oneAccount, badge });
         });
 
         return jobs;
