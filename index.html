@@ -899,7 +899,7 @@
                 </div>
                 <div class="mid-info-item">
                     <div class="mid-info-label">Contact Us</div>
-                    <div class="mid-info-value tel">+33 4 93 34 74 73</div>
+                    <div class="mid-info-value tel">+33 4 93 34 47 73</div>
                 </div>
             </div>
         </div>
@@ -1023,26 +1023,21 @@
 
     // ─── BADGE HELPER ───
     function getBadge(job) {
-        // Try to infer badge from job data
-        const title = (job.title || '').toLowerCase();
         const type = (job.type || '').toLowerCase();
         const extra = (job.badge || '').toLowerCase();
-
         if (extra === 'urgent' || type.includes('urgent')) return '<span class="badge badge-urgent">URGENT</span>';
         if (extra === 'new') return '<span class="badge badge-new">NEW</span>';
-        if (type === 'permanent') return '<span class="badge badge-available">Available</span>';
-        if (type === 'seasonal') return '<span class="badge badge-available">Available</span>';
-        return '<span class="badge badge-more">MORE</span>';
+        return '';
     }
 
     // ─── JOB CARD ───
     function createJobCard(job) {
         const badge = getBadge(job);
-        const oneImg = '';
-
-        // Extract yacht size if present in title (e.g. "57m")
-        const sizeMatch = job.title.match(/(\d+m[+]?)/i);
-        const yachtSize = sizeMatch ? sizeMatch[1] : '';
+        const oneImg = job.oneAccount
+            ? `<img src="https://www.bluewateryachting.com/_uploads/website/one-account-logo.png"
+                     onerror="this.style.display='none'"
+                     style="height:22px;width:auto;vertical-align:middle;margin-left:8px;border-radius:50%;" alt="OneAccount" />`
+            : '';
         const cleanTitle = job.title;
 
         return `
@@ -1067,16 +1062,18 @@
 
     // ─── COURSE CARD ───
     function createCourseCard(course) {
-        let cls = 'badge-available', label = course.availability || 'Available';
-        const av = (label).toLowerCase();
-        if (av.includes('full') || av.includes('waiting')) { cls = 'badge-full'; }
-        else if (av.includes('limited') || av.includes('left') || av.includes('spaces')) { cls = 'badge-limited'; }
+        const av = (course.availability || '').toLowerCase();
+        let cls, label, extraNote = '';
 
-        // Parse sub-note (e.g. "3 Spaces Left")
-        const extraNote = av.includes('spaces') || av.includes('left') || av.includes('soon') ? label : '';
-        const badgeLabel = av.includes('full') || av.includes('waiting') ? 'Fully Booked' 
-                         : av.includes('limited') || av.includes('spaces') || av.includes('left') ? 'Available'
-                         : 'Available';
+        if (av.includes('full') || av.includes('waiting')) {
+            cls = 'badge-full'; label = 'Fully Booked';
+        } else if (av.includes('soon') || av.includes('starting')) {
+            cls = 'badge-new'; label = 'Starting Soon';
+        } else {
+            cls = 'badge-available'; label = 'Available';
+        }
+
+        if (av.includes('spaces') || av.includes('left')) extraNote = course.availability;
 
         return `
             <div class="course-card">
@@ -1089,7 +1086,7 @@
                     </div>
                 </div>
                 <div class="course-right">
-                    <span class="badge ${cls}">${badgeLabel}</span>
+                    <span class="badge ${cls}">${label}</span>
                     ${extraNote ? `<div class="course-extra">${extraNote}</div>` : ''}
                 </div>
             </div>`;
@@ -1340,9 +1337,11 @@
             } else {
                 const fullTitle = s.sub ? `${s.title||''} · ${s.sub}` : (s.title||'');
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
-                    <img class="mid-event-img" src="${s.img||''}" alt=""
-                         onerror="this.src='https://placehold.co/260x190/003876/ffffff?text=Event'" />
-                    <div class="mid-event-title">${fullTitle}</div>
+                    <div class="mid-qr" style="width:150px;height:150px;border-radius:12px;overflow:hidden;margin-bottom:12px;">
+                        <img src="${s.img||''}" alt="" style="width:150px;height:150px;object-fit:cover;"
+                             onerror="this.src='https://placehold.co/150x150/003876/ffffff?text=Event'" />
+                    </div>
+                    <div class="mid-app-title" style="font-size:1.0em;margin-bottom:0;">${fullTitle}</div>
                 </div>`;
             }
         }).join('');
