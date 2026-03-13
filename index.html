@@ -1200,13 +1200,17 @@
                 else if (text.includes('Salary:')) salary = text.replace('Salary:', '').trim();
             });
 
-            const oneAccount = !!(
-                container.querySelector('img[src*="one"]') ||
-                container.querySelector('img[alt*="one" i]') ||
-                container.querySelector('[class*="one-account"],[class*="oneaccount"],[class*="one_account"]') ||
-                container.innerHTML.toLowerCase().includes('one-account') ||
-                container.innerHTML.toLowerCase().includes('oneaccount')
-            );
+            // Detect ONE account - check every image src and alt in the container
+            let oneAccount = false;
+            container.querySelectorAll('img').forEach(img => {
+                const src = (img.src || img.getAttribute('src') || '').toLowerCase();
+                const alt = (img.alt || '').toLowerCase();
+                if (src.includes('one') || alt.includes('one')) oneAccount = true;
+            });
+            if (!oneAccount) {
+                const html = container.innerHTML.toLowerCase();
+                if (html.includes('one-account') || html.includes('oneaccount') || html.includes('one_account') || html.includes('/one')) oneAccount = true;
+            }
 
             // Detect URGENT / NEW badges from page
             const containerText = container.innerHTML.toLowerCase();
@@ -1375,17 +1379,15 @@
             if (s.type === 'qr') {
                 return `<div class="mid-slide${i===0?' active':''}" id="slide-${i}">
                     <div class="mid-app-title">Download Our App</div>
-                    <div class="mid-app-sub">Find Jobs &amp; Courses<br>on Your Phone</div>
-                    <div class="mid-qr">
+                    <div class="mid-app-sub">Scan to find Jobs &amp; Courses</div>
+                    <div class="mid-qr" style="width:200px;height:200px;">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=186x186&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR" />
                     </div>
-                    <div class="mid-scan-text">Scan to download</div>
                 </div>`;
             } else {
-                const fullTitle = s.sub ? `${s.title||''} · ${s.sub}` : (s.title||'');
                 return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
                     <div class="mid-app-title" style="font-size:1.1em;">${s.title||''}</div>
-                    <div class="mid-app-sub">${s.sub||'&nbsp;'}</div>
+                    <div class="mid-app-sub">&nbsp;</div>
                     <div class="mid-qr" style="overflow:hidden;padding:0;">
                         <img class="event-photo" src="${s.img||''}" alt="" style="object-fit:cover;display:block;"
                              onerror="this.src='https://placehold.co/200x200/003876/ffffff?text=Event'" />
