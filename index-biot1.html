@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluewater - Jobs & Courses Monitor</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy: #003876;
+            --navy-dark: #002558;
+            --navy-mid: #004a9a;
+            --blue-accent: #1a6fc4;
+            --blue-light: #4a9fd4;
+            --urgent: #e05c00;
+            --new: #1a6fc4;
+            --available: #1e7e34;
+            --full: #b02a37;
+            --limited: #856404;
+            --card-bg: rgba(255,255,255,0.93);
+            --col-bg: transparent;
+            --border: rgba(255,255,255,0.25);
+            --text: #1a2b45;
+            --text-muted: #5a7090;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: var(--navy);
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='20' viewBox='0 0 60 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q15 0 30 10 Q45 20 60 10' stroke='rgba(255,255,255,0.06)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            background: rgba(0,0,0,0.25);
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4a9fd4, #1a6fc4, #003876, #1a6fc4, #4a9fd4);
+        }
+
+        /* Wave texture in header */
+        .header::before { content: none; }
+
+        .logo {
+            z-index: 1;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            height: 70px;
+            width: auto;
+            object-fit: contain;
+            mix-blend-mode: lighten;
+        }
+
+        .header-clock {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 3.2em;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 4px;
+            z-index: 1;
+            min-width: 220px;
+        }
+
+        .header-weather {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1;
+            min-width: 220px;
+            justify-content: flex-end;
+        }
+
+        .weather-icon-large {
+            font-size: 1.8em;
+            line-height: 1;
+        }
+
+        .weather-info {
+            text-align: left;
+        }
+
+        .weather-city {
+            font-size: 0.82em;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .weather-line {
+            font-size: 1.05em;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .weather-sub {
+            font-size: 0.78em;
+            color: rgba(255,255,255,0.65);
+        }
+
+        /* ─── MAIN CONTENT ─── */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 300px 1fr;
+            height: calc(100vh - 80px - 90px);
+            gap: 0;
+        }
+
+        .column {
+            overflow: hidden;
+            position: relative;
+            background: transparent;
+        }
+
+        .column:first-child {
+            border-right: 2px solid var(--border);
+        }
+
+        .column:last-child {
+            border-left: 2px solid var(--border);
+        }
+
+        /* ─── MIDDLE PANEL ─── */
+        .middle-panel {
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 12px 16px 12px;
+            gap: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .middle-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: none;
+        }
+
+        /* ─── MIDDLE CAROUSEL ─── */
+        .mid-carousel {
+            width: 100%;
+            z-index: 1;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .mid-carousel-track {
+            position: relative;
+            width: 100%;
+        }
+
+        .mid-slide {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeSlide 0.6s ease;
+            width: 100%;
+            min-height: 230px;
+        }
+
+        .mid-slide.active { display: flex; }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* QR slide */
+        .mid-app-title {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.2em;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        .mid-app-sub {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .mid-qr {
+            width: 100%;
+            height: 160px;
+            background: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 6px;
+            flex-shrink: 0;
+        }
+
+        .mid-qr img { width: 148px; height: 148px; }
+        .mid-qr img.event-photo { width: 100%; height: 160px; border-radius: 10px; object-fit: cover; }
+
+        .mid-scan-text {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.55);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        /* Image/event slides — same size as QR box */
+        .mid-event-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .mid-event-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.3;
+            margin-bottom: 3px;
+        }
+
+        .mid-event-sub {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+        }
+
+        /* Carousel dots */
+        .mid-dots {
+            display: flex;
+            gap: 7px;
+            justify-content: center;
+            z-index: 1;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .mid-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .mid-dot.active {
+            background: #ffffff;
+            transform: scale(1.3);
+        }
+
+        .mid-divider {
+            width: 80%;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+            z-index: 1;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .mid-info-block {
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .mid-info-item {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 6px 16px;
+            text-align: center;
+        }
+
+        .mid-info-label {
+            font-size: 0.68em;
+            color: rgba(255,255,255,0.75);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1px;
+            font-weight: 700;
+        }
+
+        .mid-info-value {
+            font-size: 1.0em;
+            color: #ffffff;
+            font-weight: 700;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .mid-info-value.tel {
+            font-size: 1.0em;
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(74,159,212,0.8);
+        }
+
+        .mid-info-item:last-child {
+            background: rgba(74,159,212,0.2);
+            border: 1px solid rgba(74,159,212,0.5);
+        }
+
+        .col-header {
+            padding: 14px 24px 10px;
+            background: transparent;
+            border-bottom: 2px solid var(--border);
+            position: relative;
+        }
+
+        .col-header h2 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.7em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .col-scroll-area {
+            overflow: hidden;
+            height: calc(100% - 50px);
+            position: relative;
+        }
+
+        .column-wrapper {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ─── JOB CARDS ─── */
+        .job-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 4px rgba(0,56,118,0.07);
+            border-left: 3px solid var(--border);
+            transition: box-shadow 0.2s;
+        }
+
+        .job-card:hover { box-shadow: 0 3px 12px rgba(0,56,118,0.12); }
+
+        .job-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        .job-title {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+            flex: 1;
+        }
+
+        .job-title a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .badge {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 9px;
+            border-radius: 3px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .badge-urgent { background: var(--urgent); color: #fff; }
+        .badge-new { background: var(--new); color: #fff; }
+        .badge-available { background: var(--available); color: #fff; }
+        .badge-more { background: #6c757d; color: #fff; }
+        .badge-full { background: var(--full); color: #fff; }
+        .badge-limited { background: var(--limited); color: #fff; }
+
+        .job-sub {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .job-sub .sep { opacity: 0.4; }
+
+        .job-meta {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .job-meta span strong {
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        .one-badge img {
+            height: 20px;
+            width: auto;
+            margin-left: 6px;
+            vertical-align: middle;
+            opacity: 0.85;
+        }
+
+        /* ─── COURSE CARDS ─── */
+        .course-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 4px rgba(0,56,118,0.07);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .course-card:hover { box-shadow: 0 3px 12px rgba(0,56,118,0.12); }
+
+        .course-left { flex: 1; min-width: 0; }
+
+        .course-name {
+            font-size: 1.0em;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .course-name a { color: var(--text); text-decoration: none; }
+
+        .course-details {
+            font-size: 0.82em;
+            color: var(--text-muted);
+        }
+
+        .course-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .course-extra {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* ─── OFFICE HOURS BAR - now in middle column, hide old bar ─── */
+        .office-bar { display: none; }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            height: 90px;
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-mid) 100%);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+            flex-shrink: 0;
+            border-top: 2px solid rgba(74,159,212,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='20' viewBox='0 0 60 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q15 0 30 10 Q45 20 60 10' stroke='rgba(255,255,255,0.035)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") repeat;
+        }
+
+        /* App download section */
+        .footer-app {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            z-index: 1;
+        }
+
+        .footer-app-text {
+            color: #ffffff;
+        }
+
+        .footer-app-text strong {
+            display: block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.15em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .footer-app-text span {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.3;
+            display: block;
+        }
+
+        .qr-box {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .qr-box img {
+            width: 76px;
+            height: 76px;
+        }
+
+        /* News ticker */
+        .footer-news {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px 20px;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .footer-news-label {
+            font-size: 0.7em;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .news-ticker-wrap {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .news-ticker {
+            display: flex;
+            gap: 0;
+            animation: ticker-scroll 40s linear infinite;
+            white-space: nowrap;
+        }
+
+        .news-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding-right: 60px;
+        }
+
+        .news-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 5px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .news-thumb-placeholder {
+            width: 58px;
+            height: 58px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            flex-shrink: 0;
+        }
+
+        .news-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--blue-light);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .news-title {
+            font-size: 0.88em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .news-date {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.55);
+        }
+
+        @keyframes ticker-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ─── SCROLL ANIMATIONS ─── */
+        #jobsWrapper {
+            animation: scroll-up 80s linear infinite;
+        }
+
+        #coursesWrapper {
+            animation: scroll-up 80s linear infinite;
+        }
+
+        @keyframes scroll-up {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        @keyframes scroll-up-2 {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 1em;
+            color: var(--text-muted);
+        }
+
+        /* ─── LAYOUT WRAPPER ─── */
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ─── ADMIN OVERLAY ─── */
+        #adminOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        #adminOverlay.open { display: flex; }
+
+        .admin-modal {
+            background: #fff;
+            border-radius: 14px;
+            width: 620px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #002558, #003876);
+            padding: 22px 28px;
+            border-radius: 14px 14px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-header-text h2 { color: #fff; font-size: 1.2em; font-weight: 700; letter-spacing: 0.5px; }
+        .admin-header-text span { font-size: 0.8em; color: rgba(255,255,255,0.6); margin-top: 2px; display: block; }
+
+        .admin-close {
+            background: rgba(255,255,255,0.15);
+            border: none; color: #fff;
+            width: 34px; height: 34px;
+            border-radius: 50%; font-size: 1.2em;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .admin-close:hover { background: rgba(255,255,255,0.3); }
+
+        .admin-body { padding: 24px 28px; }
+
+        #adminLogin { display: block; }
+        #adminPanel { display: none; }
+
+        .admin-login-wrap {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 14px; padding: 10px 0 10px;
+        }
+        .admin-login-wrap .lock-icon { font-size: 2.8em; }
+        .admin-login-wrap h3 { font-size: 1.1em; color: #1a2b45; font-weight: 700; }
+        .admin-login-wrap p { font-size: 0.85em; color: #666; text-align: center; }
+
+        .admin-input {
+            width: 100%; max-width: 280px;
+            padding: 12px 16px;
+            border: 2px solid #ccdaec; border-radius: 8px;
+            font-size: 1em; outline: none;
+            transition: border 0.2s; text-align: center; letter-spacing: 3px;
+        }
+        .admin-input:focus { border-color: #1a6fc4; }
+
+        .admin-btn {
+            padding: 11px 28px; border: none; border-radius: 8px;
+            font-size: 0.95em; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s; font-family: Arial, sans-serif;
+        }
+        .admin-btn:hover { opacity: 0.9; }
+        .admin-btn:active { transform: scale(0.98); }
+        .admin-btn-primary   { background: #003876; color: #fff; }
+        .admin-btn-danger    { background: #b02a37; color: #fff; }
+        .admin-btn-success   { background: #1e7e34; color: #fff; }
+        .admin-btn-secondary { background: #eef3f9; color: #1a2b45; border: 1px solid #ccdaec; }
+
+        .admin-error { color: #b02a37; font-size: 0.85em; text-align: center; min-height: 18px; }
+
+        .admin-section-title {
+            font-size: 0.72em; font-weight: 700; color: #5a7090;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            margin: 16px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #eef3f9;
+        }
+
+        .slide-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+        .slide-item {
+            background: #f7fafd; border: 1px solid #ccdaec;
+            border-radius: 10px; padding: 12px 14px;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .slide-thumb {
+            width: 70px; height: 50px; border-radius: 6px;
+            object-fit: cover; background: #dde6f0; flex-shrink: 0; border: 1px solid #ccdaec;
+        }
+
+        .slide-thumb-qr {
+            width: 70px; height: 50px; border-radius: 6px;
+            background: #003876; display: flex; align-items: center;
+            justify-content: center; color: #fff; font-size: 1.5em; flex-shrink: 0;
+        }
+
+        .slide-info { flex: 1; min-width: 0; }
+        .slide-info input {
+            width: 100%; padding: 7px 10px;
+            border: 1px solid #ccdaec; border-radius: 6px;
+            font-size: 0.83em; margin-bottom: 5px; outline: none; font-family: Arial, sans-serif;
+        }
+        .slide-info input:last-child { margin-bottom: 0; }
+        .slide-info input:focus { border-color: #1a6fc4; }
+        .slide-info input::placeholder { color: #bbb; }
+
+        .slide-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+        .slide-btn {
+            padding: 6px 13px; border: none; border-radius: 6px;
+            font-size: 0.78em; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s; font-family: Arial, sans-serif;
+        }
+        .slide-btn:hover { opacity: 0.8; }
+        .slide-btn-save   { background: #1a6fc4; color: #fff; }
+        .slide-btn-delete { background: #b02a37; color: #fff; }
+
+        .add-slide-form {
+            background: #eef3f9; border: 1.5px dashed #b0c4de;
+            border-radius: 10px; padding: 16px; margin-bottom: 16px;
+        }
+        .add-slide-form p { font-size: 0.82em; color: #5a7090; margin-bottom: 10px; font-weight: 600; }
+        .add-slide-form input {
+            width: 100%; padding: 9px 12px;
+            border: 1px solid #ccdaec; border-radius: 6px;
+            font-size: 0.85em; margin-bottom: 8px;
+            outline: none; font-family: Arial, sans-serif;
+        }
+        .add-slide-form input:focus { border-color: #1a6fc4; }
+        .add-slide-form input:last-of-type { margin-bottom: 12px; }
+
+        .admin-footer-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 14px; border-top: 1px solid #eef3f9; margin-top: 4px;
+        }
+        .admin-hint { font-size: 0.73em; color: #aaa; }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-clock" id="clock">00:00</div>
+
+        <div class="logo">
+            <img src="bw_logos_.png" alt="Bluewater" class="logo-img">
+        </div>
+
+        <div class="header-weather" id="weatherWidget">
+            <div class="weather-icon-large">🌤️</div>
+            <div class="weather-info">
+                <div class="weather-city">Antibes</div>
+                <div class="weather-line" id="weatherLine">--°C · --</div>
+                <div class="weather-sub" id="weatherSub">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN COLUMNS -->
+    <div class="main">
+        <!-- JOBS -->
+        <div class="column">
+            <div class="col-header">
+                <h2>Crew Jobs</h2>
+            </div>
+            <div class="col-scroll-area">
+                <div class="column-wrapper" id="jobsWrapper">
+                    <div class="loading">Loading jobs...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIDDLE PANEL -->
+        <div class="middle-panel">
+
+            <!-- CAROUSEL (populated by JS) -->
+            <div class="mid-carousel">
+                <div class="mid-carousel-track" id="carouselTrack"></div>
+            </div>
+
+            <!-- DOTS (populated by JS) -->
+            <div class="mid-dots" id="midDots"></div>
+
+            <div class="mid-divider"></div>
+
+            <div class="mid-info-block">
+                <div class="mid-info-item">
+                    <div class="mid-info-label">Office Hours</div>
+                    <div class="mid-info-value">08H00 – 17H00</div>
+                </div>
+                <div class="mid-info-item">
+                    <div class="mid-info-label">Crew Interviews</div>
+                    <div class="mid-info-value">09H00 – 12H00</div>
+                </div>
+                <div class="mid-info-item">
+                    <div class="mid-info-label">Contact Us</div>
+                    <div class="mid-info-value tel">+33 4 93 34 47 73</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COURSES -->
+        <div class="column">
+            <div class="col-header">
+                <h2>Training Courses</h2>
+            </div>
+            <div class="col-scroll-area">
+                <div class="column-wrapper" id="coursesWrapper">
+                    <div class="loading">Loading courses...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <div class="footer-news" style="grid-column: 1 / -1; padding: 10px 30px;">
+            <div class="footer-news-label">Upcoming Events &amp; Latest News</div>
+            <div class="news-ticker-wrap">
+                <div class="news-ticker" id="newsTicker"></div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end .app -->
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  ADMIN OVERLAY  (open with Ctrl+Shift+A)        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="adminOverlay">
+    <div class="admin-modal">
+
+        <div class="admin-header">
+            <div class="admin-header-text">
+                <h2>⚙️ Carousel Manager</h2>
+                <span>Bluewater Digital Display · Admin</span>
+            </div>
+            <button class="admin-close" onclick="closeAdmin()">✕</button>
+        </div>
+
+        <div class="admin-body">
+
+            <!-- LOGIN SCREEN -->
+            <div id="adminLogin">
+                <div class="admin-login-wrap">
+                    <div class="lock-icon">🔒</div>
+                    <h3>Admin Access</h3>
+                    <p>Enter the admin password to manage carousel slides.</p>
+                    <input class="admin-input" type="password" id="adminPwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') checkPassword()" />
+                    <div class="admin-error" id="adminError"></div>
+                    <button class="admin-btn admin-btn-primary" onclick="checkPassword()">Unlock</button>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL -->
+            <div id="adminPanel">
+                <div class="admin-section-title">📋 Current Slides</div>
+                <div class="slide-list" id="adminSlideList"></div>
+
+                <div class="admin-section-title">➕ Add New Slide</div>
+                <div class="add-slide-form">
+                    <p>Paste a direct image URL (jpg, png, webp) or leave blank to use a colour placeholder.</p>
+                    <input type="text" id="newImgUrl"   placeholder="Image URL  e.g. https://example.com/photo.jpg" />
+                    <input type="text" id="newTitle"    placeholder="Title  e.g. Med Season Kick-Off Party" />
+                    <input type="text" id="newSubtitle" placeholder="Subtitle  e.g. 15 May 2026 · Antibes" />
+                    <button class="admin-btn admin-btn-success" onclick="addSlide()">Add Slide</button>
+                </div>
+
+                <div class="admin-footer-row">
+                    <span class="admin-hint">Changes save instantly · Press Ctrl+Shift+A to reopen</span>
+                    <button class="admin-btn admin-btn-secondary" onclick="closeAdmin()">Close</button>
+                </div>
+            </div>
+
+        </div><!-- end admin-body -->
+    </div><!-- end admin-modal -->
+</div><!-- end adminOverlay -->
+
+<script>
+    let jobsData = [];
+    let coursesData = [];
+
+    // ─── CLOCK ───
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2,'0');
+        const m = String(now.getMinutes()).padStart(2,'0');
+        document.getElementById('clock').textContent = `${h}:${m}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ─── WEATHER ICONS ───
+    const weatherIcons = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',61:'🌧️',63:'🌧️',65:'⛈️',71:'🌨️',73:'❄️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
+    const weatherDesc = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Foggy',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Light showers',81:'Showers',82:'Heavy showers',85:'Light snow showers',86:'Snow showers',95:'Thunderstorm',96:'Thunderstorm with hail',99:'Heavy thunderstorm'};
+
+    async function fetchWeather() {
+        try {
+            const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.5808&longitude=7.1239&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Europe/Paris');
+            const data = await res.json();
+            const c = data.current;
+            const temp = Math.round(c.temperature_2m);
+            const icon = weatherIcons[c.weather_code] || '🌤️';
+            const desc = weatherDesc[c.weather_code] || 'Partly cloudy';
+            const wind = Math.round(c.wind_speed_10m);
+            const hum = c.relative_humidity_2m;
+
+            document.getElementById('weatherWidget').innerHTML = `
+                <div class="weather-icon-large">${icon}</div>
+                <div class="weather-info">
+                    <div class="weather-city">Antibes</div>
+                    <div class="weather-line">${temp}°C · ${desc}</div>
+                    <div class="weather-sub">💧 ${hum}% &nbsp;💨 ${wind} km/h</div>
+                </div>
+            `;
+        } catch(e) { console.error('Weather error', e); }
+    }
+
+    // ─── BADGE HELPER ───
+    function getBadge(job) {
+        const type = (job.type || '').toLowerCase();
+        const extra = (job.badge || '').toLowerCase();
+        if (extra === 'urgent' || type.includes('urgent')) return '<span class="badge badge-urgent">URGENT</span>';
+        if (extra === 'new') return '<span class="badge badge-new">NEW</span>';
+        return '';
+    }
+
+    // ─── JOB CARD ───
+    function createJobCard(job) {
+        const badge = getBadge(job);
+        const oneImg = job.oneAccount
+            ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#003876;color:#ffffff;font-size:0.6em;font-weight:900;letter-spacing:0.5px;width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-left:6px;flex-shrink:0;border:2px solid #4a9fd4;">ONE</span>`
+            : '';
+        const cleanTitle = job.title;
+
+        return `
+            <div class="job-card">
+                <div class="job-top">
+                    <div class="job-title">
+                        <a href="${job.url || '#'}" target="_blank">${cleanTitle}</a>${oneImg}
+                    </div>
+                    ${badge}
+                </div>
+                <div class="job-sub">
+                    <span>${job.location}</span>
+                    ${job.type ? `<span class="sep">|</span><span>${job.type}</span>` : ''}
+                    ${job.salary && job.salary !== 'DOE' ? `<span class="sep">|</span><span>${job.salary}</span>` : ''}
+                </div>
+                <div class="job-meta">
+                    ${job.qualifications ? `<span><strong>Quals:</strong> ${job.qualifications}</span>` : ''}
+                    ${job.experience ? `<span><strong>Exp:</strong> ${job.experience}</span>` : ''}
+                </div>
+            </div>`;
+    }
+
+    // ─── COURSE CARD ───
+    function createCourseCard(course) {
+        const av = (course.availability || '').toLowerCase();
+        let cls, label, extraNote = '';
+
+        if (av.includes('full') || av.includes('waiting')) {
+            cls = 'badge-full'; label = 'Fully Booked';
+        } else if (av.includes('soon') || av.includes('starting')) {
+            cls = 'badge-new'; label = 'Starting Soon';
+        } else {
+            cls = 'badge-available'; label = 'Available';
+        }
+
+        if (av.includes('spaces') || av.includes('left')) extraNote = course.availability;
+
+        return `
+            <div class="course-card">
+                <div class="course-left">
+                    <div class="course-name">
+                        <a href="${course.url || '#'}" target="_blank">${course.course}</a>
+                    </div>
+                    <div class="course-details">
+                        ${course.date ? `<span style="color:#4a9fd4;font-weight:700;">📅 ${course.date}</span>` : ''}${course.location ? ` &nbsp;·&nbsp; ${course.location}` : ''}
+                    </div>
+                </div>
+                <div class="course-right">
+                    <span class="badge ${cls}">${label}</span>
+                    ${extraNote ? `<div class="course-extra">${extraNote}</div>` : ''}
+                </div>
+            </div>`;
+    }
+
+    // ─── FALLBACK DATA ───
+    function getFallbackJobs() {
+        return [
+            { title:"Chief Stewardess – 60m Motor Yacht", url:"#", location:"South of France", type:"Permanent", qualifications:"STCW, ENG1, Food Hygiene", experience:"3 Seasons+", salary:"DOE", oneAccount:true, badge:"urgent" },
+            { title:"Chief Mate – 50m Sailing Yacht", url:"#", location:"Maeterhar", type:"Permanent", qualifications:"OOW 3000GT", experience:"2 Years+", salary:"DOE", oneAccount:true, badge:"new" },
+            { title:"Sous Chef – 120m Motor Yacht", url:"#", location:"South of France", type:"Permanent", qualifications:"STCW, ENG1, Food Hygiene L2", experience:"2 Years+", salary:"DOE", oneAccount:false, badge:"urgent" },
+            { title:"Deckhand – 70m Motor Yacht", url:"#", location:"Mediterranean", type:"Seasonal", qualifications:"STCW, ENG1, PBL2", experience:"1 Season+", salary:"DOE", oneAccount:true, badge:"more" },
+            { title:"OOW / 2nd Officer – 70m Motor Yacht", url:"#", location:"Western Med", type:"Permanent", qualifications:"OOW 3000GT", experience:"2 Years+", salary:"DOE", oneAccount:false, badge:"" },
+            { title:"Sole Chef – 57m Private Sailing Yacht", url:"#", location:"Med", type:"Permanent", qualifications:"STCW, ENG1, PBL2", experience:"1 Season+", salary:"DOE", oneAccount:true },
+            { title:"Deckhand – 57m Private Sailing Yacht", url:"#", location:"Med", type:"Permanent", qualifications:"STCW, ENG1, PBL2", experience:"1 Season+", salary:"DOE", oneAccount:true },
+            { title:"Sole Chef – 47m Private Motor Yacht", url:"#", location:"Western Med / Italy", type:"Seasonal", qualifications:"STCW, ENG1, Food Hygiene L2", experience:"1 Year+", salary:"8000 EUR", oneAccount:true },
+            { title:"Chief Steward(ess) – 30m+ Private Motor Yacht", url:"#", location:"Mediterranean", type:"Seasonal", qualifications:"STCW, ENG1, Food Hygiene L2", experience:"3 Seasons+ as Chief Stewardess", salary:"DOE", oneAccount:true },
+            { title:"Junior Housekeeper – 120m+ Motor Yacht", url:"#", location:"2026 Med", type:"Rotational 4:2", qualifications:"STCW, ENG1", experience:"1 Year+", salary:"2500 EUR", oneAccount:false }
+        ];
+    }
+
+    function getFallbackCourses() {
+        return [
+            { date:'01 May', course:'STCW Basic Safety Training', location:'Antibes', availability:'Starting Soon', url:'#' },
+            { date:'03 May', course:'Powerboat Level 2', location:'Fort Lauderdale', availability:'Fully Booked', url:'#' },
+            { date:'06 May', course:'Advanced Fire Fighting', location:'Palma', availability:'Available', url:'#' },
+            { date:'10 May', course:'Yachtmaster Offshore Theory', location:'Palma', availability:'3 Spaces Left', url:'#' },
+            { date:'09 May', course:'GWO Sea Survival', location:'Fort Lauderdale', availability:'Available', url:'#' },
+            { date:'16 Feb', course:'Celestial Navigation', location:'Antibes', availability:'Available', url:'#' },
+            { date:'Online', course:'Proficiency In Designated Security Duties (PDSD)', location:'Online', availability:'Available', url:'#' }
+        ];
+    }
+
+    // ─── INIT DISPLAY ───
+    function initializeJobs() {
+        const wrapper = document.getElementById('jobsWrapper');
+        if (!jobsData.length) { wrapper.innerHTML = '<div class="loading">Loading jobs...</div>'; return; }
+        const html = jobsData.map(createJobCard).join('');
+        wrapper.innerHTML = html + html;
+    }
+
+    function initializeCourses() {
+        const wrapper = document.getElementById('coursesWrapper');
+        if (!coursesData.length) { wrapper.innerHTML = '<div class="loading">Loading courses...</div>'; return; }
+        const html = coursesData.map(createCourseCard).join('');
+        wrapper.innerHTML = html + html;
+    }
+
+    // ─── NEWS TICKER ───
+    function renderNewsTicker(items) {
+        const html = [...items, ...items].map(i => {
+            const thumb = i.img
+                ? `<img class="news-thumb" src="${i.img}" alt="" onerror="this.outerHTML='<div class=\\'news-thumb-placeholder\\'>📰</div>'">`
+                : `<div class="news-thumb-placeholder">📰</div>`;
+            return `
+            <div class="news-item">
+                ${thumb}
+                <div class="news-dot"></div>
+                <span class="news-title">${i.title}</span>
+            </div>`;
+        }).join('');
+        document.getElementById('newsTicker').innerHTML = html;
+    }
+
+    function parseNewsFromHTML(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const base = 'https://www.bluewateryachting.com';
+        const items = [];
+        const seen = new Set();
+
+        doc.querySelectorAll('a[href*="/news/"]').forEach(link => {
+            const href = link.getAttribute('href') || '';
+            const fullHref = href.startsWith('http') ? href : base + href;
+            if (!fullHref.match(/\/news\/[a-z0-9-]+-\d+$/)) return;
+            if (seen.has(fullHref)) return;
+            const img = link.querySelector('img');
+            if (!img) return;
+            const rawSrc = img.getAttribute('src') || '';
+            const imgSrc = rawSrc.startsWith('http') ? rawSrc : base + rawSrc;
+            if (!imgSrc.includes('_uploads')) return;
+            const nextLink = link.nextElementSibling;
+            const title = (nextLink && nextLink.tagName === 'A')
+                ? nextLink.textContent.trim()
+                : img.alt || '';
+            if (!title) return;
+            seen.add(fullHref);
+            items.push({ title, img: imgSrc, url: fullHref });
+        });
+
+        return items;
+    }
+
+    async function fetchNews() {
+        try {
+            // Fetch page 1 and page 2 to get 10+ items
+            const [res1, res2] = await Promise.all([
+                fetch('https://www.bluewateryachting.com/news?t=' + Date.now()),
+                fetch('https://www.bluewateryachting.com/news?start_pos=6&t=' + Date.now()),
+            ]);
+            const [html1, html2] = await Promise.all([res1.text(), res2.text()]);
+            const items = [...parseNewsFromHTML(html1), ...parseNewsFromHTML(html2)];
+
+            // Deduplicate and take first 10
+            const seen = new Set();
+            const unique = items.filter(i => {
+                if (seen.has(i.url)) return false;
+                seen.add(i.url);
+                return true;
+            }).slice(0, 10);
+
+            if (unique.length > 0) {
+                renderNewsTicker(unique);
+            } else {
+                initNewsTickerFallback();
+            }
+        } catch(e) { initNewsTickerFallback(); }
+    }
+
+    function initNewsTickerFallback() {
+        const items = [
+            { title:'86th Edition Of IASST Maritime Safety Seminar - 28th April 2026, Palma', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg' },
+            { title:'Winter Activities In Liguria, Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216105210.jpg' },
+            { title:'So You\'re In A Spanish Shipyard (Palma) For The Winter…What To Do?', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216131644.jpg' },
+            { title:'NextGen – New To Yachting Forum', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg' },
+            { title:'Truffles, Motorbikes, Wine Tasting And Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg' },
+            { title:'Oceans Of Influence – Charity Gala Evening', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg' },
+        ];
+        renderNewsTicker(items);
+    }
+
+    function initNewsTicker() {
+        initNewsTickerFallback(); // show immediately
+        fetchNews();              // then fetch live
+    }
+
+    // ─── PARSE LIVE DATA ───
+    function parseJobsFromHTML(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const jobs = [];
+        const jobLinks = doc.querySelectorAll('a[href*="yacht-crew-job"]');
+        const seen = new Set();
+
+        jobLinks.forEach(link => {
+            const url = link.href;
+            if (seen.has(url) || link.textContent.trim() === 'Apply') return;
+            seen.add(url);
+
+            const title = link.textContent.trim();
+            if (!title || title === 'Apply') return;
+
+            let container = link.parentElement;
+            let attempts = 0;
+            while (container && attempts < 10) {
+                if (container.querySelector('ul')) break;
+                container = container.parentElement;
+                attempts++;
+            }
+            if (!container) return;
+
+            const listItems = container.querySelectorAll('li');
+            let type = '', qualifications = '', experience = '', salary = '', location = 'Various';
+
+            const nextSib = link.parentElement?.nextElementSibling;
+            if (nextSib && !nextSib.querySelector('ul')) location = nextSib.textContent.trim();
+
+            listItems.forEach(li => {
+                const text = li.textContent.trim();
+                if (text.match(/^(Permanent|Seasonal|Rotational|Temporary)/i)) type = text;
+                else if (text.includes('Qualifications:')) qualifications = text.replace('Qualifications:', '').trim();
+                else if (text.includes('Experience:')) experience = text.replace('Experience:', '').trim();
+                else if (text.includes('Salary:')) salary = text.replace('Salary:', '').trim();
+            });
+
+            // Detect ONE account - uses /_images/internet/buttons/one.png
+            let oneAccount = !!(
+                container.querySelector('img[src*="one.png"]') ||
+                container.querySelector('img[src*="/one"]') ||
+                container.querySelector('a[href*="one-account"]')
+            );
+
+            // Detect URGENT / NEW badges from page
+            const containerText = container.innerHTML.toLowerCase();
+            const containerClass = container.className.toLowerCase();
+            let badge = '';
+            if (containerText.includes('urgent') || containerClass.includes('urgent')) badge = 'urgent';
+            else if (containerText.includes('"new"') || containerText.includes('>new<') || containerClass.includes('new') || containerText.includes('badge-new')) badge = 'new';
+
+            jobs.push({ title, url, location: location || 'Various', type: type || 'N/A', qualifications: qualifications || 'See listing', experience: experience || 'See listing', salary: salary || 'DOE', oneAccount, badge });
+        });
+
+        return jobs;
+    }
+
+    function parseCoursesFromHTML(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const courses = [];
+
+        doc.querySelectorAll('table tr').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 4) {
+                const date = cells[0].textContent.trim();
+                const course = cells[1].textContent.trim();
+                const location = cells[2].textContent.trim();
+
+                // Try multiple ways to detect availability
+                const cell3 = cells[3];
+                const cell3Text = cell3.textContent.trim().toLowerCase();
+                const cell3HTML = cell3.innerHTML.toLowerCase();
+
+                // Check for CSS classes on elements inside the cell
+                const statusEl = cell3.querySelector('[class*="full"],[class*="available"],[class*="wait"],[class*="book"],[class*="status"],[class*="avail"]');
+                const btnEl = cell3.querySelector('a, button, span');
+                const btnText = btnEl ? btnEl.textContent.trim() : '';
+
+                let availability = 'Available';
+
+                // Priority: check for fully booked / waiting list indicators
+                if (cell3HTML.includes('full') || cell3Text.includes('full') || cell3Text.includes('waiting') || cell3Text.includes('wait list') || cell3Text.includes('booked')) {
+                    availability = 'Fully Booked';
+                } else if (statusEl && statusEl.className.toLowerCase().includes('full')) {
+                    availability = 'Fully Booked';
+                } else if (cell3Text.includes('soon') || cell3Text.includes('starting soon') || cell3Text.includes('nearly')) {
+                    availability = 'Starting Soon';
+                } else if (cell3Text.match(/\d+\s*space/) || cell3Text.match(/\d+\s*left/) || cell3Text.match(/\d+\s*place/)) {
+                    availability = cell3.textContent.trim(); // e.g. "3 Spaces Left"
+                } else if (btnText) {
+                    const bt = btnText.toLowerCase();
+                    if (bt.includes('full') || bt.includes('waiting') || bt.includes('booked')) {
+                        availability = 'Fully Booked';
+                    } else if (bt.includes('soon') || bt.includes('nearly')) {
+                        availability = 'Starting Soon';
+                    } else if (bt.match(/\d+\s*space/) || bt.match(/\d+\s*left/)) {
+                        availability = btnText;
+                    } else {
+                        availability = btnText || 'Available';
+                    }
+                }
+
+                const detailsLink = row.querySelector('a[href*="training-class"]');
+                const url = detailsLink ? detailsLink.href : '#';
+                if (course && course !== 'Course') courses.push({ date, course, location, availability, url });
+            }
+        });
+
+        return courses;
+    }
+
+    async function fetchJobs() {
+        try {
+            const baseUrl = 'https://www.bluewateryachting.com/crew-placement/yacht-crew/jobs?action=search&scroll_to=job_board&start_pos=';
+            const pages = [
+                'https://www.bluewateryachting.com/crew-placement/yacht-crew/jobs',
+                `${baseUrl}10&position=&type=&position=&category=&couples=`,
+                `${baseUrl}20&position=&type=&position=&category=&couples=`,
+                `${baseUrl}30&position=&type=&position=&category=&couples=`,
+            ];
+
+            let allJobs = [];
+            const seen = new Set();
+
+            for (const url of pages) {
+                try {
+                    const res = await fetch(url);
+                    const html = await res.text();
+                    const jobs = parseJobsFromHTML(html);
+                    jobs.forEach(job => {
+                        if (!seen.has(job.url)) {
+                            seen.add(job.url);
+                            allJobs.push(job);
+                        }
+                    });
+                } catch(e) { /* skip failed page */ }
+            }
+
+            return allJobs.length > 0 ? allJobs : getFallbackJobs();
+        } catch(e) { return getFallbackJobs(); }
+    }
+
+    async function fetchCourses() {
+        try {
+            const urls = [
+                'https://www.bluewateryachting.com/crew-training/courses/search',
+                'https://www.bluewateryachting.com/crew-training/courses/search#',
+            ];
+
+            let allCourses = [];
+            const seen = new Set();
+
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url);
+                    const html = await res.text();
+                    const courses = parseCoursesFromHTML(html);
+                    courses.forEach(c => {
+                        const key = `${c.course}|${c.date}|${c.location}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            allCourses.push(c);
+                        }
+                    });
+                } catch(e) { /* skip failed page */ }
+            }
+
+            return allCourses.length > 0 ? allCourses : getFallbackCourses();
+        } catch(e) { return getFallbackCourses(); }
+    }
+
+    // ─── SYNC SCROLL SPEEDS ───
+    // Keeps both columns scrolling at the same px/second rate
+    // Uses courses as the reference, scales jobs to match
+    function syncScrollSpeeds() {
+        const jobsWrapper = document.getElementById('jobsWrapper');
+        const coursesWrapper = document.getElementById('coursesWrapper');
+        if (!jobsWrapper || !coursesWrapper) return;
+
+        const coursesHeight = coursesWrapper.scrollHeight / 2;
+        const jobsHeight = jobsWrapper.scrollHeight / 2;
+        const baseDuration = 80; // courses reference speed in seconds
+
+        // Jobs duration scaled so px/second matches courses
+        const jobsDuration = baseDuration * (jobsHeight / coursesHeight);
+
+        coursesWrapper.style.animationDuration = baseDuration + 's';
+        jobsWrapper.style.animationDuration = jobsDuration.toFixed(1) + 's';
+    }
+
+    // ─── MAIN INIT ───
+    async function init() {
+        jobsData = getFallbackJobs();
+        coursesData = getFallbackCourses();
+        initializeJobs();
+        initializeCourses();
+        initNewsTicker();
+        fetchWeather();
+
+        const [jobs, courses] = await Promise.all([fetchJobs(), fetchCourses()]);
+        jobsData = jobs;
+        coursesData = courses;
+        initializeJobs();
+        initializeCourses();
+        setTimeout(syncScrollSpeeds, 1000);
+
+        setInterval(async () => {
+            fetchWeather();
+            fetchNews();
+            const [j, c] = await Promise.all([fetchJobs(), fetchCourses()]);
+            jobsData = j; coursesData = c;
+            initializeJobs(); initializeCourses();
+            setTimeout(syncScrollSpeeds, 1000);
+        }, 30 * 60 * 1000);
+    }
+
+    // ─── MIDDLE CAROUSEL (admin-driven) ───
+    const ADMIN_PASSWORD = 'Bluewater2026';
+    const CAROUSEL_JSON = 'https://raw.githubusercontent.com/supportbw/Bluewater-Digital/main/carousel-biot1.json';
+
+    // Default slides (fallback if GitHub unreachable)
+    const DEFAULT_SLIDES = [
+        { type:'qr' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', title:'IASST Maritime Safety Seminar · 28th April 2026 · Palma' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', title:'NextGen – New To Yachting Forum · Feb 2026 · Antibes' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', title:'Oceans Of Influence – Charity Gala · Feb 2026 · Antibes' },
+    ];
+
+    let carouselSlides = [];
+    let currentSlide   = 0;
+    let carouselTimer  = null;
+
+    // ── Fetch slides from GitHub JSON ──
+    async function loadSlides() {
+        try {
+            const res = await fetch(CAROUSEL_JSON + '?t=' + Date.now()); // bust cache
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) return data;
+        } catch(e) {}
+        return JSON.parse(JSON.stringify(DEFAULT_SLIDES));
+    }
+
+    // ── Render carousel from data ──
+    function renderCarousel() {
+        const track = document.querySelector('.mid-carousel-track');
+        const dotsEl = document.getElementById('midDots');
+        if (!track || !dotsEl) return;
+
+        track.innerHTML = carouselSlides.map((s, i) => {
+            if (s.type === 'qr') {
+                return `<div class="mid-slide${i===0?' active':''}" id="slide-${i}">
+                    <div class="mid-app-title">Download Our App</div>
+                    <div class="mid-app-sub">Scan to find Jobs &amp; Courses</div>
+                    <div class="mid-qr" style="width:160px;height:160px;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=https://www.bluewateryachting.com/app&bgcolor=ffffff&color=002558&margin=4" alt="QR" />
+                    </div>
+                </div>`;
+            } else {
+                return `<div class="mid-slide${i===currentSlide?' active':''}" id="slide-${i}">
+                    <div class="mid-app-title" style="font-size:1.1em;">${s.title||''}</div>
+                    <div class="mid-app-sub">&nbsp;</div>
+                    <div class="mid-qr" style="overflow:hidden;padding:0;width:100%;height:160px;">
+                        <img class="event-photo" src="${s.img||''}" alt="" style="width:100%;height:160px;object-fit:cover;display:block;border-radius:10px;"
+                             onerror="this.src='https://placehold.co/260x160/003876/ffffff?text=Event'" />
+                    </div>
+                </div>`;
+            }
+        }).join('');
+
+        dotsEl.innerHTML = carouselSlides.map((_, i) =>
+            `<div class="mid-dot${i===currentSlide?' active':''}" onclick="goToSlide(${i})"></div>`
+        ).join('');
+    }
+
+    function goToSlide(n) {
+        const slides = document.querySelectorAll('.mid-slide');
+        const dots   = document.querySelectorAll('.mid-dot');
+        if (!slides.length) return;
+        slides[currentSlide]?.classList.remove('active');
+        dots[currentSlide]?.classList.remove('active');
+        currentSlide = ((n % carouselSlides.length) + carouselSlides.length) % carouselSlides.length;
+        slides[currentSlide]?.classList.add('active');
+        dots[currentSlide]?.classList.add('active');
+    }
+
+    function startCarouselTimer() {
+        if (carouselTimer) clearInterval(carouselTimer);
+        carouselTimer = setInterval(() => goToSlide(currentSlide + 1), 6000);
+    }
+
+    async function initCarousel() {
+        carouselSlides = DEFAULT_SLIDES; // show immediately
+        currentSlide   = 0;
+        renderCarousel();
+        startCarouselTimer();
+
+        // Then fetch from GitHub
+        const slides = await loadSlides();
+        carouselSlides = slides;
+        currentSlide = 0;
+        renderCarousel();
+        startCarouselTimer();
+
+        // Refresh carousel from GitHub every 2 minutes
+        setInterval(async () => {
+            const fresh = await loadSlides();
+            carouselSlides = fresh;
+            currentSlide = 0;
+            renderCarousel();
+            startCarouselTimer();
+        }, 2 * 60 * 1000);
+    }
+
+    // ─── ADMIN PANEL ───
+    function openAdmin() {
+        document.getElementById('adminOverlay').classList.add('open');
+        document.getElementById('adminPwInput').value = '';
+        document.getElementById('adminError').textContent = '';
+        document.getElementById('adminLogin').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    function closeAdmin() {
+        document.getElementById('adminOverlay').classList.remove('open');
+        document.getElementById('adminLogin').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    function checkPassword() {
+        const val = document.getElementById('adminPwInput').value;
+        if (val === ADMIN_PASSWORD) {
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdminPanel();
+        } else {
+            document.getElementById('adminError').textContent = '❌ Incorrect password. Try again.';
+            document.getElementById('adminPwInput').value = '';
+            document.getElementById('adminPwInput').focus();
+        }
+    }
+
+    function renderAdminPanel() {
+        const list = document.getElementById('adminSlideList');
+        list.innerHTML = carouselSlides.map((s, i) => {
+            const thumb = s.type === 'qr'
+                ? `<div class="slide-thumb-qr">📱</div>`
+                : `<img class="slide-thumb" src="${s.img||''}" onerror="this.src='https://placehold.co/70x50/ccdaec/666?text=IMG'" />`;
+
+            const isQR = s.type === 'qr';
+            return `<div class="slide-item" id="admin-slide-${i}">
+                ${thumb}
+                <div class="slide-info">
+                    ${isQR
+                        ? `<input type="text" value="QR Code – Download App" disabled style="background:#f0f4f8;color:#888;" />`
+                        : `<input type="text" id="si-img-${i}"   value="${s.img||''}"   placeholder="Image URL" />
+                           <input type="text" id="si-title-${i}" value="${s.title||''}" placeholder="Title" />
+                           <input type="text" id="si-sub-${i}"   value="${s.sub||''}"   placeholder="Subtitle / date" />`
+                    }
+                </div>
+                <div class="slide-actions">
+                    ${!isQR ? `<button class="slide-btn slide-btn-save" onclick="saveSlide(${i})">Save</button>` : ''}
+                    ${!isQR ? `<button class="slide-btn slide-btn-delete" onclick="deleteSlide(${i})">Delete</button>` : ''}
+                    ${isQR  ? `<span style="font-size:0.75em;color:#888;">Fixed</span>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function saveSlide(i) {
+        if (carouselSlides[i].type === 'qr') return;
+        carouselSlides[i].img   = document.getElementById(`si-img-${i}`).value.trim();
+        carouselSlides[i].title = document.getElementById(`si-title-${i}`).value.trim();
+        carouselSlides[i].sub   = document.getElementById(`si-sub-${i}`).value.trim();
+
+        renderCarousel();
+        startCarouselTimer();
+        renderAdminPanel();
+        flashConfirm(`admin-slide-${i}`);
+    }
+
+    function deleteSlide(i) {
+        if (!confirm('Delete this slide?')) return;
+        carouselSlides.splice(i, 1);
+        if (currentSlide >= carouselSlides.length) currentSlide = 0;
+
+        renderCarousel();
+        startCarouselTimer();
+        renderAdminPanel();
+    }
+
+    function addSlide() {
+        const img   = document.getElementById('newImgUrl').value.trim();
+        const title = document.getElementById('newTitle').value.trim();
+        const sub   = document.getElementById('newSubtitle').value.trim();
+        if (!title && !img) { alert('Please enter at least a title or image URL.'); return; }
+        carouselSlides.push({ type:'image', img, title, sub });
+
+        renderCarousel();
+        startCarouselTimer();
+        renderAdminPanel();
+        document.getElementById('newImgUrl').value   = '';
+        document.getElementById('newTitle').value    = '';
+        document.getElementById('newSubtitle').value = '';
+    }
+
+    function flashConfirm(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.background = '#d4edda';
+        el.style.borderColor = '#28a745';
+        setTimeout(() => { el.style.background = ''; el.style.borderColor = ''; }, 1200);
+    }
+
+    // Open admin with Ctrl+Shift+A
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); openAdmin(); }
+    });
+
+    // Close overlay on backdrop click
+    document.getElementById('adminOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('adminOverlay')) closeAdmin();
+    });
+
+    init();
+    initCarousel();
+
+    // ─── AUTO RELOAD every 4 hours ───
+    // Keeps Chrome fresh, clears memory buildup
+    // Reloads at a quiet moment (checks every minute, reloads at 03:00, 07:00, 11:00, 15:00, 19:00, 23:00)
+    setInterval(() => {
+        const h = new Date().getHours();
+        const m = new Date().getMinutes();
+        if (m === 0 && [3, 7, 11, 15, 19, 23].includes(h)) {
+            location.reload();
+        }
+    }, 60 * 1000);
+</script>
+</body>
+</html>
