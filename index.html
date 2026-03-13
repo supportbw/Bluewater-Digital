@@ -1137,16 +1137,7 @@
     }
 
     // ─── NEWS TICKER ───
-    function initNewsTicker() {
-        const items = [
-            { title:'86th Edition Of IASST Maritime Safety Seminar – 28th April 2026, Palma', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', url:'https://www.bluewateryachting.com/news/86th-edition-of-iasst-maritime-safety-seminar-28th-april-2026-palma-1948' },
-            { title:'NextGen – New To Yachting Forum', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', url:'https://www.bluewateryachting.com/news/nextgen-new-to-yachting-forum-1940' },
-            { title:'Oceans Of Influence – Charity Gala Evening', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', url:'https://www.bluewateryachting.com/news/oceans-of-influence-charity-gala-evening-1939' },
-            { title:'Truffles, Motorbikes, Wine Tasting And Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg', url:'https://www.bluewateryachting.com/news/truffles-motorbikes-wine-tasting-and-italy-1944' },
-            { title:'Winter Activities In Liguria, Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216105210.jpg', url:'https://www.bluewateryachting.com/news/winter-activities-in-liguria-italy-1946' },
-            { title:'So You\'re In A Spanish Shipyard (Palma) For The Winter…What To Do?', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216131644.jpg', url:'https://www.bluewateryachting.com/news/so-you-re-in-a-spanish-shipyard-palma-for-the-winter-what-to-do-1947' },
-        ];
-
+    function renderNewsTicker(items) {
         const html = [...items, ...items].map(i => {
             const thumb = i.img
                 ? `<img class="news-thumb" src="${i.img}" alt="" onerror="this.outerHTML='<div class=\\'news-thumb-placeholder\\'>📰</div>'">`
@@ -1158,8 +1149,61 @@
                 <span class="news-title">${i.title}</span>
             </div>`;
         }).join('');
-
         document.getElementById('newsTicker').innerHTML = html;
+    }
+
+    function parseNewsFromHTML(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const items = [];
+        const seen = new Set();
+
+        // News items: anchors linking to /news/... with an image inside
+        doc.querySelectorAll('a[href*="/news/"]').forEach(link => {
+            const href = link.href;
+            if (seen.has(href) || !href.includes('/news/')) return;
+            const title = link.textContent.trim();
+            if (!title || title.length < 5) return;
+            const img = link.querySelector('img');
+            const imgSrc = img ? (img.src || img.getAttribute('src')) : null;
+            // Only use items that have both a title and image
+            if (title && imgSrc && imgSrc.includes('_uploads')) {
+                seen.add(href);
+                items.push({ title, img: imgSrc, url: href });
+            }
+        });
+
+        return items.slice(0, 10);
+    }
+
+    async function fetchNews() {
+        try {
+            const res = await fetch('https://www.bluewateryachting.com/news');
+            const html = await res.text();
+            const items = parseNewsFromHTML(html);
+            if (items.length > 0) {
+                renderNewsTicker(items);
+            } else {
+                initNewsTickerFallback();
+            }
+        } catch(e) { initNewsTickerFallback(); }
+    }
+
+    function initNewsTickerFallback() {
+        const items = [
+            { title:'86th Edition Of IASST Maritime Safety Seminar – 28th April 2026, Palma', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg' },
+            { title:'NextGen – New To Yachting Forum', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg' },
+            { title:'Oceans Of Influence – Charity Gala Evening', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg' },
+            { title:'Truffles, Motorbikes, Wine Tasting And Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260213141011.jpg' },
+            { title:'Winter Activities In Liguria, Italy', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216105210.jpg' },
+            { title:'So You\'re In A Spanish Shipyard (Palma) For The Winter…What To Do?', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260216131644.jpg' },
+        ];
+        renderNewsTicker(items);
+    }
+
+    function initNewsTicker() {
+        initNewsTickerFallback(); // show immediately
+        fetchNews();              // then fetch live
     }
 
     // ─── PARSE LIVE DATA ───
@@ -1201,17 +1245,12 @@
                 else if (text.includes('Salary:')) salary = text.replace('Salary:', '').trim();
             });
 
-            // Detect ONE account - check every image src and alt in the container
-            let oneAccount = false;
-            container.querySelectorAll('img').forEach(img => {
-                const src = (img.src || img.getAttribute('src') || '').toLowerCase();
-                const alt = (img.alt || '').toLowerCase();
-                if (src.includes('one') || alt.includes('one')) oneAccount = true;
-            });
-            if (!oneAccount) {
-                const html = container.innerHTML.toLowerCase();
-                if (html.includes('one-account') || html.includes('oneaccount') || html.includes('one_account') || html.includes('/one')) oneAccount = true;
-            }
+            // Detect ONE account - uses /_images/internet/buttons/one.png
+            let oneAccount = !!(
+                container.querySelector('img[src*="one.png"]') ||
+                container.querySelector('img[src*="/one"]') ||
+                container.querySelector('a[href*="one-account"]')
+            );
 
             // Detect URGENT / NEW badges from page
             const containerText = container.innerHTML.toLowerCase();
@@ -1283,19 +1322,61 @@
 
     async function fetchJobs() {
         try {
-            const res = await fetch('https://www.bluewateryachting.com/crew-placement/yacht-crew/jobs');
-            const html = await res.text();
-            const jobs = parseJobsFromHTML(html);
-            return jobs.length > 0 ? jobs : getFallbackJobs();
+            const baseUrl = 'https://www.bluewateryachting.com/crew-placement/yacht-crew/jobs?action=search&scroll_to=job_board&start_pos=';
+            const pages = [
+                'https://www.bluewateryachting.com/crew-placement/yacht-crew/jobs',
+                `${baseUrl}10&position=&type=&position=&category=&couples=`,
+                `${baseUrl}20&position=&type=&position=&category=&couples=`,
+                `${baseUrl}30&position=&type=&position=&category=&couples=`,
+            ];
+
+            let allJobs = [];
+            const seen = new Set();
+
+            for (const url of pages) {
+                try {
+                    const res = await fetch(url);
+                    const html = await res.text();
+                    const jobs = parseJobsFromHTML(html);
+                    jobs.forEach(job => {
+                        if (!seen.has(job.url)) {
+                            seen.add(job.url);
+                            allJobs.push(job);
+                        }
+                    });
+                } catch(e) { /* skip failed page */ }
+            }
+
+            return allJobs.length > 0 ? allJobs : getFallbackJobs();
         } catch(e) { return getFallbackJobs(); }
     }
 
     async function fetchCourses() {
         try {
-            const res = await fetch('https://www.bluewateryachting.com/crew-training/courses/search');
-            const html = await res.text();
-            const courses = parseCoursesFromHTML(html);
-            return courses.length > 0 ? courses : getFallbackCourses();
+            const urls = [
+                'https://www.bluewateryachting.com/crew-training/courses/search',
+                'https://www.bluewateryachting.com/crew-training/courses/search#',
+            ];
+
+            let allCourses = [];
+            const seen = new Set();
+
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url);
+                    const html = await res.text();
+                    const courses = parseCoursesFromHTML(html);
+                    courses.forEach(c => {
+                        const key = `${c.course}|${c.date}|${c.location}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            allCourses.push(c);
+                        }
+                    });
+                } catch(e) { /* skip failed page */ }
+            }
+
+            return allCourses.length > 0 ? allCourses : getFallbackCourses();
         } catch(e) { return getFallbackCourses(); }
     }
 
@@ -1331,6 +1412,7 @@
 
         setInterval(async () => {
             fetchWeather();
+            fetchNews();
             const [j, c] = await Promise.all([fetchJobs(), fetchCourses()]);
             jobsData = j; coursesData = c;
             initializeJobs(); initializeCourses();
@@ -1340,34 +1422,28 @@
 
     // ─── MIDDLE CAROUSEL (admin-driven) ───
     const ADMIN_PASSWORD = 'Bluewater2026';
-    const STORAGE_KEY    = 'bw_carousel_slides';
+    const CAROUSEL_JSON = 'https://raw.githubusercontent.com/supportbw/Bluewater-Digital/main/carousel.json';
 
-    // Default slides (used if nothing stored yet)
+    // Default slides (fallback if GitHub unreachable)
     const DEFAULT_SLIDES = [
         { type:'qr' },
-        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', title:'IASST Maritime Safety Seminar', sub:'28th April 2026 · Palma' },
-        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', title:'NextGen – New To Yachting Forum', sub:'Feb 2026 · Antibes' },
-        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', title:'Oceans Of Influence – Charity Gala', sub:'Feb 2026 · Antibes' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260224153339.jpg', title:'IASST Maritime Safety Seminar · 28th April 2026 · Palma' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260223090735.jpg', title:'NextGen – New To Yachting Forum · Feb 2026 · Antibes' },
+        { type:'image', img:'https://www.bluewateryachting.com/_uploads/website/news/500/20260209131459.jpg', title:'Oceans Of Influence – Charity Gala · Feb 2026 · Antibes' },
     ];
 
     let carouselSlides = [];
     let currentSlide   = 0;
     let carouselTimer  = null;
 
-    // ── Load from localStorage ──
-    function loadSlides() {
+    // ── Fetch slides from GitHub JSON ──
+    async function loadSlides() {
         try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-            }
+            const res = await fetch(CAROUSEL_JSON + '?t=' + Date.now()); // bust cache
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) return data;
         } catch(e) {}
         return JSON.parse(JSON.stringify(DEFAULT_SLIDES));
-    }
-
-    function saveSlides() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(carouselSlides)); } catch(e) {}
     }
 
     // ── Render carousel from data ──
@@ -1418,11 +1494,27 @@
         carouselTimer = setInterval(() => goToSlide(currentSlide + 1), 6000);
     }
 
-    function initCarousel() {
-        carouselSlides = loadSlides();
+    async function initCarousel() {
+        carouselSlides = DEFAULT_SLIDES; // show immediately
         currentSlide   = 0;
         renderCarousel();
         startCarouselTimer();
+
+        // Then fetch from GitHub
+        const slides = await loadSlides();
+        carouselSlides = slides;
+        currentSlide = 0;
+        renderCarousel();
+        startCarouselTimer();
+
+        // Refresh carousel from GitHub every 30 minutes
+        setInterval(async () => {
+            const fresh = await loadSlides();
+            carouselSlides = fresh;
+            currentSlide = 0;
+            renderCarousel();
+            startCarouselTimer();
+        }, 30 * 60 * 1000);
     }
 
     // ─── ADMIN PANEL ───
@@ -1485,7 +1577,7 @@
         carouselSlides[i].img   = document.getElementById(`si-img-${i}`).value.trim();
         carouselSlides[i].title = document.getElementById(`si-title-${i}`).value.trim();
         carouselSlides[i].sub   = document.getElementById(`si-sub-${i}`).value.trim();
-        saveSlides();
+
         renderCarousel();
         startCarouselTimer();
         renderAdminPanel();
@@ -1496,7 +1588,7 @@
         if (!confirm('Delete this slide?')) return;
         carouselSlides.splice(i, 1);
         if (currentSlide >= carouselSlides.length) currentSlide = 0;
-        saveSlides();
+
         renderCarousel();
         startCarouselTimer();
         renderAdminPanel();
@@ -1508,7 +1600,7 @@
         const sub   = document.getElementById('newSubtitle').value.trim();
         if (!title && !img) { alert('Please enter at least a title or image URL.'); return; }
         carouselSlides.push({ type:'image', img, title, sub });
-        saveSlides();
+
         renderCarousel();
         startCarouselTimer();
         renderAdminPanel();
@@ -1537,6 +1629,17 @@
 
     init();
     initCarousel();
+
+    // ─── AUTO RELOAD every 4 hours ───
+    // Keeps Chrome fresh, clears memory buildup
+    // Reloads at a quiet moment (checks every minute, reloads at 03:00, 07:00, 11:00, 15:00, 19:00, 23:00)
+    setInterval(() => {
+        const h = new Date().getHours();
+        const m = new Date().getMinutes();
+        if (m === 0 && [3, 7, 11, 15, 19, 23].includes(h)) {
+            location.reload();
+        }
+    }, 60 * 1000);
 </script>
 </body>
 </html>
